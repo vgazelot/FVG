@@ -3,34 +3,97 @@
 #include <string.h>
 
 /*
+ *Fonction qui retourne le nombre de character qu'il y a dans une ligne, ce qui permet de pouvoir plasser le fseek()en debut de la prochaine ligne
+ */
+
+int getNbCharLine() {
+
+	FILE * file = NULL; 
+	file =fopen("characters.txt","r"); // r for readonly
+	int count=0;
+	if(file != NULL) {
+		char chartmp;
+		do {
+			
+			chartmp = fgetc(file);
+			if(chartmp != '\n') {
+				count ++;
+			}
+			
+		}while(chartmp != EOF && chartmp != '\n');
+	}
+	else printf("ERROR CAN'T OPEN FILE");
+	fclose(file);
+	return count;
+}
+
+
+/*
  * Fonction qui va retourner un tableau de tous les noms des personnages se trouvant dans characteres.txt
  */
-char** getNamesCharacterFile() {
+char** getNamesCharacterFile(int nbChar) {
 	FILE * characterFile = NULL;
 	characterFile = fopen("characters.txt","r"); // "r" pour read only
 	char chaine[10];
-	char ** names = malloc (10*sizeof(char*)); // J'instenci un tableau dynamic de la taille de 10 pointers de char (tableau 2dimenssions)
+	char ** names = malloc (nbChar*sizeof(char*)); // J'instenci un tableau dynamic de la taille du nb de perso créé pointers de char (tableau 2dimenssions)
 	int n=0;
 	while(n<10) {
-		names[n] = malloc (10*sizeof(char));// On instenci names[n] chaque n aura un tableau dynamic de 10 char
+		names[n] = malloc (10*sizeof(char));// On instenci names[n] chaque n aura un tableau dynamic de 10 char (name)
 		n++;
 	}
 	if(characterFile != NULL ) {
-		int j=0;
+		/*int j=0;
 		while(fgets(chaine,10,characterFile) !=NULL) {
 			int i=0;
 			while( chaine[i] !=';') {
 				names[j][i] = chaine[i];
 				i++;
 			}
+			names[j][i] = '\0';
 			j++;
-		}
+		}*/
+
+		printf("lol");
 	}
 	else {
 		printf("Impossible d'ouvrir le fichier characters.txt");
 	}
 	return names;
 }
+/*
+ *FOnction qui retourne le nombre de personnage dans characters.txt
+ */
+int getNbCharacter() {
+	FILE * characterFile = NULL;
+        characterFile = fopen("characters.txt","r"); // "r" pour read only
+        int count=0;
+	if(characterFile != NULL ) {
+        	char chartmp;
+		int first = 1;
+		
+		do {	
+			chartmp = fgetc(characterFile);
+			if(chartmp != '\n' && chartmp != EOF) {	
+				if(first == 1 ) {
+					//printf("\n\n%c\n\n",chartmp); // il en li 1 en trop (dépassement de tampon)
+					count++;
+					first = 0;
+				}
+			}
+			else {
+				first = 1;
+			}
+		}while(chartmp != EOF);
+	
+	}
+        else {
+                printf("Impossible d'ouvrir le fichier characters.txt");
+        }
+	fclose(characterFile);
+	return count;
+
+}
+
 /*
  * Fonction qui permet de demander à l'utilisateur le nom du personnage qu'il veut créer.
  */
@@ -45,11 +108,21 @@ char* getName() {
 		while(name[i] != '\0') {
 			i++;
 		}
-		char** names = getNamesCharacterFile();
-		printf("%c",names[0][0]);
+		int count = getNbCharacter();
+		char** names = getNamesCharacterFile(count);
 		/*
-			TODO : Traitement pour comparer si le noms choisi n'existe pas déja ! 
-		*/
+	         * TODO : Traitement pour comparer si le nom choisi n'existe pas déja ! 
+		 */
+		//printf("\nNb line dans le fichier characters.txt : %d",getNbCharacter());
+		int i = 0;
+		while (i > count ) {
+			int j = 0;
+			while(names[i][j] != '\0') {
+				printf("%c",names[i][j]);
+				j++;
+			}
+			i++;
+		}
 		free(names);
 	}while(i > 10 && exist == 1);
 	return name;
@@ -87,6 +160,7 @@ void creatUser() {
 	characterFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
 
 	char className[7];
+	printf("\nNb line dans le fichier characters.txt : %d",getNbCharacter());
 	int selectedNumber = getClass(); 
 	char* name =  getName();
 	if(selectedNumber == 1) { //guerrier
@@ -97,7 +171,7 @@ void creatUser() {
 		className[4] = 'i';
 		className[5] = 'o';
 		className[6] = 'r';
-		
+		className[7] = '\0';
 		agility = 5;
 		strenght = 10;
 		intellect = 5;
@@ -108,6 +182,7 @@ void creatUser() {
 		className[1] = 'a';
 		className[2] = 'g';
 		className[3] = 'e';
+		className[4] = '\0';
 		agility = 5;
 		strenght = 5;
 		intellect = 10;
@@ -119,6 +194,7 @@ void creatUser() {
 		className[2] = 'g';
 		className[3] = 'u';
 		className[4] = 'e';
+		className[5] = '\0';
 		agility = 10;
 		strenght = 5;
 		intellect = 5;
