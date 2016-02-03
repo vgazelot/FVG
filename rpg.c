@@ -156,9 +156,9 @@ int getClass() {
 	        printf("*               Choisissez une classe               *\n");
 	        printf("*                                                   *\n");
 	        printf("*****************************************************\n");
-		printf ("               1. Guerrier\n");
-		printf ("               2. Mage\n");
-		printf ("               3. Voleur\n");
+		printf ("                  1. Guerrier\n");
+		printf ("                  2. Mage\n");
+		printf ("                  3. Voleur\n");
 		scanf("%d",&selectedNumber);
 	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3);
 	return selectedNumber;
