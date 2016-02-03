@@ -107,7 +107,7 @@ char* getName() {
 	        printf("*****************************************************\n");
 		exist = 0;
 		i = 1;
-		printf("\n\n           Nom du personnage : \n\n");
+		printf("          Nom du personnage : ");
 		scanf("%s",name);
 		while(name[i] != '\0') {
 			i++;
@@ -156,9 +156,9 @@ int getClass() {
 	        printf("*               Choisissez une classe               *\n");
 	        printf("*                                                   *\n");
 	        printf("*****************************************************\n");
-		printf ("                    1. Guerrier\n");
-		printf ("                    2. Mage\n");
-		printf ("                    3. Voleur\n");
+		printf ("               1. Guerrier\n");
+		printf ("               2. Mage\n");
+		printf ("               3. Voleur\n");
 		scanf("%d",&selectedNumber);
 	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3);
 	return selectedNumber;
@@ -255,13 +255,13 @@ void selectCharacter() {
  */
 void printMenu () {
 	system("clear");
-	printf("*******************************************************************\n");
-	printf("*                                                                 *\n");
-	printf("*                   Bienvenu dans FVG                             *\n");
-	printf("*                                                                 *\n");
-	printf("*******************************************************************\n");
-	printf("                   1.Créer un personnage       \n");
-	printf("                   2.Selectionner un personnage    \n");
+	printf("*****************************************************\n");
+	printf("*                                                   *\n");
+	printf("*                 Bienvenu dans FVG                 *\n");
+	printf("*                                                   *\n");
+	printf("*****************************************************\n");
+	printf("                1. Créer un personnage       \n");
+	printf("                2. Selectionner un personnage    \n");
 	
 
 }
