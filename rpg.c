@@ -3,95 +3,91 @@
 #include <string.h>
 
 /*
- *Fonction qui retourne le nombre de character qu'il y a dans une ligne, ce qui permet de pouvoir plasser le fseek()en debut de la prochaine ligne
+ * Fonction qui rajout ".txt" à la chaine mis en parametre
  */
 
-int getNbCharLine() {
-
-	FILE * file = NULL; 
-	file =fopen("characters.txt","r"); // r for readonly
-	int count=0;
-	if(file != NULL) {
-		char chartmp;
-		do {
-			
-			chartmp = fgetc(file);
-			if(chartmp != '\n') {
-				count ++;
-			}
-			
-		}while(chartmp != EOF && chartmp != '\n');
+char * addTxt(char chaine[]) {
+	int i = 0;
+	while(chaine[i] != '\0') {
+		i ++;
 	}
-	else printf("ERROR CAN'T OPEN FILE");
-	fclose(file);
+	char * chaineWithTxt = malloc(i+4 * sizeof(char));
+
+	char txt[] = ".txt";
+	i = 0;
+	while(chaine[i] != '\0') {
+		chaineWithTxt[i] = chaine[i];
+		i ++;
+	}
+	int j = i;
+	i = 0;
+	while(i < 4) {
+		chaineWithTxt[j] = txt[i];
+		i ++;
+		j ++;
+	}
+
+	return chaineWithTxt;
+	
+}
+
+/*
+ *FOnction qui retourne le nombre de personnage dans characters.txt
+ */
+int getNbCharacter() {
+	FILE * charactersFile = fopen ("characters.txt","r");
+	char tmp;
+	int count = 0;
+	int first = 1;
+	do {
+		tmp = fgetc(charactersFile);	
+		if( tmp != EOF) {
+			if(tmp != ';'&& first == 1) {
+				count ++;
+				first = 0;
+			}
+			else {
+				if(tmp == ';') {
+					first = 1;
+				}
+			}
+		}
+	}while(tmp != EOF);
 	return count;
+
 }
 
 
 /*
  * Fonction qui va retourner un tableau de tous les noms des personnages se trouvant dans characteres.txt
  */
-char** getNamesCharacterFile(int nbChar) {
-	FILE * characterFile = NULL;
-	characterFile = fopen("characters.txt","r"); // "r" pour read only
-	char chaine[10];
-	char ** names = malloc (nbChar*sizeof(char*)); // J'instenci un tableau dynamic de la taille du nb de perso créé pointers de char (tableau 2dimenssions)
-	int n=0;
-	while(n<10) {
-		names[n] = malloc (10*sizeof(char));// On instenci names[n] chaque n aura un tableau dynamic de 10 char (name)
-		n++;
+char** getNamesCharacterFile() {
+	int nbCharacter = getNbCharacter();
+	char ** names = malloc(nbCharacter * sizeof(char *));
+	int i = 0;
+	while(i < nbCharacter) {
+		names[i] = malloc( 10 * sizeof(char));
+		i ++;
 	}
-	if(characterFile != NULL ) {
-		/*int j=0;
-		while(fgets(chaine,10,characterFile) !=NULL) {
-			int i=0;
-			while( chaine[i] !=';') {
-				names[j][i] = chaine[i];
+	FILE * charactersFile = fopen ("characters.txt","r");
+	char tmp;
+	i = 0;
+	int j= 0;
+	do {
+		tmp = fgetc(charactersFile);	
+		if( tmp != EOF) {
+			if(tmp != ';') {
+				names[i][j] = tmp;
+				j++;
+			}
+			else{
+				j = 0;
 				i++;
 			}
-			names[j][i] = '\0';
-			j++;
-		}*/
+		}
+	}while(tmp != EOF);
 
-		printf("lol");
-	}
-	else {
-		printf("Impossible d'ouvrir le fichier characters.txt");
-	}
 	return names;
-}
-/*
- *FOnction qui retourne le nombre de personnage dans characters.txt
- */
-int getNbCharacter() {
-	FILE * characterFile = NULL;
-        characterFile = fopen("characters.txt","r"); // "r" pour read only
-        int count=0;
-	if(characterFile != NULL ) {
-        	char chartmp;
-		int first = 1;
-		
-		do {	
-			chartmp = fgetc(characterFile);
-			if(chartmp != '\n' && chartmp != EOF) {	
-				if(first == 1 ) {
-					//printf("\n\n%c\n\n",chartmp); // il en li 1 en trop (dépassement de tampon)
-					count++;
-					first = 0;
-				}
-			}
-			else {
-				first = 1;
-			}
-		}while(chartmp != EOF);
-	
-	}
-        else {
-                printf("Impossible d'ouvrir le fichier characters.txt");
-        }
-	fclose(characterFile);
-	return count;
-
 }
 
 /*
@@ -100,31 +96,49 @@ int getNbCharacter() {
 
 char* getName() {
 	int i = 1;
-	int exist = 1;
+	int exist = 0;
 	char * name = malloc(100 * sizeof(char));
+	system("clear");
 	do {
-		printf("Nom du personnage : \n");
+	        printf("*****************************************************\n");
+	        printf("*                                                   *\n");
+	        printf("*               Creation du personnage              *\n");
+	        printf("*                                                   *\n");
+	        printf("*****************************************************\n");
+		exist = 0;
+		i = 1;
+		printf("\n\n           Nom du personnage : \n\n");
 		scanf("%s",name);
 		while(name[i] != '\0') {
 			i++;
 		}
-		int count = getNbCharacter();
-		char** names = getNamesCharacterFile(count);
-		/*
-	         * TODO : Traitement pour comparer si le nom choisi n'existe pas déja ! 
-		 */
-		//printf("\nNb line dans le fichier characters.txt : %d",getNbCharacter());
-		int i = 0;
-		while (i > count ) {
+		int nbCharacter = getNbCharacter();
+		char ** names = getNamesCharacterFile();
+		int t = 0; 
+		int diff = 0;
+		while( t < nbCharacter && exist == 0) {
 			int j = 0;
-			while(names[i][j] != '\0') {
-				printf("%c",names[i][j]);
+			int n = 0;
+			diff = 0;
+			while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
+				if( name[n] != names[t][j]) {
+					diff = 1;	
+				}
 				j++;
+				n++;
 			}
-			i++;
+			if(diff == 0) {
+				exist = 1;		
+			}
+			t++;
+		}
+		if(exist == 1 && nbCharacter > 0) {
+			system("clear");
+			printf("/!\\ PERSONNAGE DEJA EXISTANT ! /!\\ \n Veuillez choisir un autre nom.\n");
+			exist = 1;	
 		}
 		free(names);
-	}while(i > 10 && exist == 1);
+	}while(i > 10 || exist == 1);
 	return name;
 }
 
@@ -136,14 +150,22 @@ int getClass() {
 
 	int selectedNumber;
 	do {
-		printf("Quel classe voulez-vous faire ? \n");
-		printf ("1.Guerrier\n");
-		printf ("2.Mage\n");
-		printf ("3.Voleur\n");
+		system("clear");
+	        printf("*****************************************************\n");
+	        printf("*                                                   *\n");
+	        printf("*               Choisissez une classe               *\n");
+	        printf("*                                                   *\n");
+	        printf("*****************************************************\n");
+		printf ("                    1. Guerrier\n");
+		printf ("                    2. Mage\n");
+		printf ("                    3. Voleur\n");
 		scanf("%d",&selectedNumber);
 	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3);
 	return selectedNumber;
 }
+
+
+
 
 /*
  *Fonction main de la création d'un personnage
@@ -151,18 +173,21 @@ int getClass() {
 
 void creatUser() {
 	
-	
+	system("clear");	
 	int agility;
 	int strenght;
 	int intellect;
 	int stamina;
-	FILE* characterFile = NULL;
-	characterFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
+	FILE* charactersFile = NULL;
+	charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
 
 	char className[7];
-	printf("\nNb line dans le fichier characters.txt : %d",getNbCharacter());
 	int selectedNumber = getClass(); 
 	char* name =  getName();
+	
+	char * chaineWithTxt = addTxt(name);
+
+	FILE * characterFile = fopen(chaineWithTxt, "a");
 	if(selectedNumber == 1) { //guerrier
 		className[0] = 'W';
 		className[1] = 'a';
@@ -202,13 +227,15 @@ void creatUser() {
 	}
 	if(characterFile != NULL) {
 		fprintf(characterFile, "%s;%s;%d;%d;%d;%d\n",name,className,agility,strenght,intellect,stamina);
+		fprintf(charactersFile,"%s;",name);
 	}
 	else {
 		printf("Impossible d'ouvrir le fichier characters.txt");
 	}
+	fclose(charactersFile);
 	fclose(characterFile);
 	free(name);
-	printf("Personnage cree ! %d,%d,%d,%d\n",agility,strenght,intellect,stamina);
+	printf("Personnage cree !\n");
 }
 	
 /*
@@ -227,18 +254,14 @@ void selectCharacter() {
  * Fonction qui afficher le menu principal 
  */
 void printMenu () {
-
+	system("clear");
 	printf("*******************************************************************\n");
+	printf("*                                                                 *\n");
 	printf("*                   Bienvenu dans FVG                             *\n");
 	printf("*                                                                 *\n");
-	printf("*                                                                 *\n");
-	printf("*1.Créer un personnage                                            *\n");
-	printf("*                                                                 *\n");
-	printf("*2.Selectionner un personnage                                     *\n");
-	printf("*                                                                 *\n");
-	printf("*                                                                 *\n");
-	printf("*                                                                 *\n");
 	printf("*******************************************************************\n");
+	printf("                   1.Créer un personnage       \n");
+	printf("                   2.Selectionner un personnage    \n");
 	
 
 }
@@ -264,6 +287,7 @@ int main() {
 	int userChoise = getMenu();
 
 	if(userChoise == 1) {
+		system("clear");
 		creatUser();
 	}
 	else if(userChoise == 2) {
