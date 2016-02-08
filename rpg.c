@@ -2,6 +2,291 @@
 #include <stdlib.h>
 #include <string.h>
 
+//define printTop(char nameTxt[]);
+
+
+char * getNameCharacter(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	char * name = malloc(10 * sizeof(char));
+	if(character != NULL) {
+
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp != EOF && tmp != ';') name[i] = tmp;
+			i++;
+		}while(tmp != ';' && tmp != EOF);
+		name[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+
+	return name;
+
+}
+
+char * getClassName(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int second = 0;
+	char * className = malloc(10*sizeof(char));
+	if(character != NULL) {
+
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && second == 0) {
+				second = 1;
+			} 
+			else {
+				if(second == 1 && tmp != ';') {
+					className[i] = tmp;
+					i++;
+				}else if(second == 1 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		className[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	
+	
+	return className;
+
+}
+
+char * getAgility(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * agility = malloc(5*sizeof(char)); //valeur à changer si le jeux permet d'avoir une agilité sup à 9999 (lol)
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 2) {
+				count ++;
+			} 
+			else {
+				if(count == 2 && tmp != ';') {
+					agility[i] = tmp;
+					i++;
+				}else if(count == 2 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		agility[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return agility;
+}
+
+char * getStrenght(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * strenght = malloc(5*sizeof(char)); //valeur à changer si le jeux permet d'avoir une agilité sup à 9999 (lol)
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 3) {
+				count ++;
+			} 
+			else {
+				if(count == 3 && tmp != ';') {
+					strenght[i] = tmp;
+					i++;
+				}else if(count == 3 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		strenght[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return strenght;
+}
+char * getIntelect(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * intelect = malloc(5*sizeof(char)); //valeur à changer si le jeux permet d'avoir une intelect sup à 9999 (lol)
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 4) {
+				count ++;
+			} 
+			else {
+				if(count == 4 && tmp != ';') {
+					intelect[i] = tmp;
+					i++;
+				}else if(count == 4 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		intelect[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return intelect;
+}
+char * getStamina(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * stamina = malloc(5*sizeof(char)); //valeur à changer si le jeux permet d'avoir une endu sup à 9999 (lol)
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 5) {
+				count ++;
+			} 
+			else {
+				if(count == 5 && tmp != ';') {
+					stamina[i] = tmp;
+					i++;
+				}else if(count == 5 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		stamina[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return stamina;
+}
+char * getXp(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * xp = malloc(5*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 6) {
+				count ++;
+			} 
+			else {
+				if(count == 6 && tmp != ';') {
+					xp[i] = tmp;
+					i++;
+				}else if(count == 6 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		xp[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return xp;
+}
+char * getLvl(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * lvl = malloc(5*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 7) {
+				count ++;
+			} 
+			else {
+				if(count == 7 && tmp != ';') {
+					lvl[i] = tmp;
+					i++;
+				}else if(count == 7 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		lvl[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return lvl;
+}
+void printTop(char nameTxt[]) {
+	//FILE * character = fopen(nameTxt,"r");
+	char * name = getNameCharacter(nameTxt);
+	printf("name : %s\n",name);
+	char * className = getClassName(nameTxt);
+	printf("ClassName : %s\n",className);
+	char * agility = getAgility(nameTxt);
+	printf("Agility : %s\n",agility);
+	char * strenght = getStrenght(nameTxt);
+	printf("Strenght : %s\n",strenght);
+	char * intelect= getIntelect(nameTxt);
+	printf("Intelect : %s\n",intelect);
+	char * stamina= getStamina(nameTxt);
+	printf("Stamina : %s\n",stamina);
+	char * xp= getXp(nameTxt);
+	printf("xp : %s\n",xp);
+	char * lvl= getLvl(nameTxt);
+	printf("lvl : %s\n",lvl);
+	free(name);
+	free(stamina);
+	free(className);
+	free(agility);
+	free(strenght);
+	free(intelect);
+	free(xp);
+	free(lvl);
+	//fclose(character);
+}
 /*
  * Fonction qui rajout ".txt" à la chaine mis en parametre
  */
@@ -30,7 +315,6 @@ char * addTxt(char chaine[]) {
 	return chaineWithTxt;
 	
 }
-
 /*
  *FOnction qui retourne le nombre de personnage dans characters.txt
  */
@@ -98,8 +382,11 @@ char* getName() {
 	int i = 1;
 	int exist = 0;
 	char * name = malloc(100 * sizeof(char));
-	system("clear");
 	do {
+		system("clear");
+		if( i > 10) {
+			printf("Nom supérieur a 10 characteres \n" );
+		}
 	        printf("*****************************************************\n");
 	        printf("*                                                   *\n");
 	        printf("*               Creation du personnage              *\n");
@@ -107,7 +394,7 @@ char* getName() {
 	        printf("*****************************************************\n");
 		exist = 0;
 		i = 1;
-		printf("          Nom du personnage : ");
+		printf("   Nom du personnage (10 characteres max): ");
 		scanf("%s",name);
 		while(name[i] != '\0') {
 			i++;
@@ -178,6 +465,8 @@ void creatUser() {
 	int strenght;
 	int intellect;
 	int stamina;
+	int xp = 100;
+	int lvl =1;
 	FILE* charactersFile = NULL;
 	charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
 
@@ -226,7 +515,7 @@ void creatUser() {
 		stamina = 7;
 	}
 	if(characterFile != NULL) {
-		fprintf(characterFile, "%s;%s;%d;%d;%d;%d\n",name,className,agility,strenght,intellect,stamina);
+		fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;\n",name,className,agility,strenght,intellect,stamina,xp,lvl);
 		fprintf(charactersFile,"%s;",name);
 	}
 	else {
@@ -236,6 +525,11 @@ void creatUser() {
 	fclose(characterFile);
 	free(name);
 	printf("Personnage cree !\n");
+}
+
+void getMap() {
+		
+
 }
 	
 /*
@@ -262,6 +556,7 @@ void printMenu () {
 	printf("*****************************************************\n");
 	printf("                1. Créer un personnage       \n");
 	printf("                2. Selectionner un personnage    \n");
+	printf("                3. generer map    \n");
 	
 
 }
@@ -275,7 +570,7 @@ int getMenu() {
 	do {
 		scanf("%d",&get);		
 
-	}while(get != 1 && get !=2);
+	}while(get != 1 && get !=2 && get != 3);
 
 	return get;
 }
@@ -291,7 +586,11 @@ int main() {
 		creatUser();
 	}
 	else if(userChoise == 2) {
-		selectCharacter();	
+		//selectCharacter();
+		printTop("bloodax.txt");	
+	}
+	else if(userChoise == 3) {
+		getMap();
 	}
 	else {
 
