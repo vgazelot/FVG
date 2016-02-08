@@ -1,1 +1,2 @@
 krinz;Warriorˆ~;5;10;5;10
+krinz;Rogue@;10;5;5;7
