@@ -260,23 +260,37 @@ char * getLvl(char nameTxt[]) {
 	return lvl;
 }
 void printTop(char nameTxt[]) {
-	//FILE * character = fopen(nameTxt,"r");
+	FILE * character = fopen(nameTxt,"r");
 	char * name = getNameCharacter(nameTxt);
-	printf("name : %s\n",name);
+	//printf("name : %s\n",name);
 	char * className = getClassName(nameTxt);
-	printf("ClassName : %s\n",className);
+	//printf("ClassName : %s\n",className);
 	char * agility = getAgility(nameTxt);
-	printf("Agility : %s\n",agility);
+	//printf("Agility : %s\n",agility);
 	char * strenght = getStrenght(nameTxt);
-	printf("Strenght : %s\n",strenght);
+	//printf("Strenght : %s\n",strenght);
 	char * intelect= getIntelect(nameTxt);
-	printf("Intelect : %s\n",intelect);
+	//printf("Intelect : %s\n",intelect);
 	char * stamina= getStamina(nameTxt);
-	printf("Stamina : %s\n",stamina);
+	//printf("Stamina : %s\n",stamina);
 	char * xp= getXp(nameTxt);
-	printf("xp : %s\n",xp);
+	//printf("xp : %s\n",xp);
 	char * lvl= getLvl(nameTxt);
-	printf("lvl : %s\n",lvl);
+	//printf("lvl : %s\n",lvl);
+	int countNbCharLvl = 0;
+	while(lvl[countNbCharLvl] != '\0') {
+		countNbCharLvl ++;
+	}	
+	printf("***********************************************************************************************\n");
+	printf("*                                                                                             *\n");
+	if(countNbCharLvl < 2)
+	printf("* Name : %s                                                                      LvL : %s *\n",name,lvl); 
+	else
+	printf("* Name : %s                                                                     LvL : %s *\n",name,lvl); 
+	printf("*                                                                                             *\n");
+	printf("*                                                                                             *\n");
+	printf("***********************************************************************************************\n");
+
 	free(name);
 	free(stamina);
 	free(className);
@@ -285,7 +299,7 @@ void printTop(char nameTxt[]) {
 	free(intelect);
 	free(xp);
 	free(lvl);
-	//fclose(character);
+	fclose(character);
 }
 /*
  * Fonction qui rajout ".txt" à la chaine mis en parametre
@@ -527,23 +541,14 @@ void creatUser() {
 	printf("Personnage cree !\n");
 }
 
-void getMap() {
-		
+void getMap(int sn) {
+	system("clear");
+	sn --;
+	char ** names = getNamesCharacterFile();
+	printTop(addTxt(names[sn]));		
 
 }
 	
-/*
- * Fonction permettant de selectionner un personnage parmis une liste de perso stocké dans un fichier "characters.txt"
- */
-
-void selectCharacter() {
-
-
-	printf("SelectCharacter");
-
-
-}
-
 /*
  * Fonction qui afficher le menu principal 
  */
@@ -575,6 +580,33 @@ int getMenu() {
 	return get;
 }
 
+int  selectCharacter() {
+	system("clear");
+	printf("*****************************************************\n");
+	printf("*                                                   *\n");
+	printf("*              Selection du personnage              *\n");
+	printf("*                                                   *\n");
+	printf("*****************************************************\n");
+	char ** names = getNamesCharacterFile();
+	int nbCharacter = getNbCharacter();
+	int i = 0;
+	int selectedNumber;
+	if(nbCharacter != 0) {
+		while(i < nbCharacter) {
+			printf("             %d. %s\n",i + 1,names[i]);
+			i ++;
+		}
+		do {	
+			scanf("%d",&selectedNumber);
+		}while(selectedNumber < 0 || selectedNumber > nbCharacter);
+	}else {
+		printf("           Aucun personnage\n");
+		return -1;
+	}
+	free(names);
+	return selectedNumber;
+}
+
 
 int main() {
 
@@ -586,19 +618,25 @@ int main() {
 		creatUser();
 	}
 	else if(userChoise == 2) {
-		//selectCharacter();
-		printTop("bloodax.txt");	
+		int sn = selectCharacter();
+		if(sn == -1 ) {
+			printf("        1.retourner au menu principal\n");
+			int tmp;
+			do {
+				scanf("%d",&tmp);
+			}while(tmp != 1);
+			printMenu();
+		}
+		//printf("          Vous avez choisis le numéro %d\n",sn);
+		getMap(sn);
 	}
 	else if(userChoise == 3) {
-		getMap();
+		//getMap();
 	}
 	else {
 
 		printf("ERROR");
 	}
-
-
-
 return 0;
 }
 
