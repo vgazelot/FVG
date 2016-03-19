@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-//define printTop(char nameTxt[]);
+
+void navigationMenu();
 
 
 char * getNameCharacter(char nameTxt[]) {
@@ -259,6 +260,70 @@ char * getLvl(char nameTxt[]) {
 	}
 	return lvl;
 }
+char * getHPTotal(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * hp = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 8) {
+				count ++;
+			} 
+			else {
+				if(count == 8 && tmp != ';') {
+					hp[i] = tmp;
+					i++;
+				}else if(count == 8 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		hp[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return hp;
+}
+char * getHPNew(char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * hp = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 9) {
+				count ++;
+			} 
+			else {
+				if(count == 9 && tmp != ';') {
+					hp[i] = tmp;
+					i++;
+				}else if(count == 9 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		hp[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return hp;
+}
 void printTop(char nameTxt[]) {
 	FILE * character = fopen(nameTxt,"r");
 	char * name = getNameCharacter(nameTxt);
@@ -278,19 +343,38 @@ void printTop(char nameTxt[]) {
 	char * lvl= getLvl(nameTxt);
 	//printf("lvl : %s\n",lvl);
 	int countNbCharLvl = 0;
+	char * hpTotal = getHPTotal(nameTxt);
+	char * hpNew = getHPNew(nameTxt);
+	int hpTotalInt = atoi(hpTotal);
+	int hpNewInt = atoi(hpNew);
+	int nblife = 0;
+	int ratioHP = ( hpNewInt * 100) / hpTotalInt;
 	while(lvl[countNbCharLvl] != '\0') {
 		countNbCharLvl ++;
-	}	
+	}
+	int nbCharName = 0;
+	while (name[nbCharName] != '\0') {
+		nbCharName ++;
+	}
 	printf("***********************************************************************************************\n");
 	printf("*                                                                                             *\n");
-	if(countNbCharLvl < 2)
-	printf("* Name : %s                                                                      LvL : %s *\n",name,lvl); 
-	else
-	printf("* Name : %s                                                                     LvL : %s *\n",name,lvl); 
-	printf("*                                                                                             *\n");
-	printf("*                                                                                             *\n");
+	printf("* Name : %s",name);
+	int j;
+	for(j=10; j> nbCharName ;j--) printf(" ");
+	printf("                                                                  LvL : %s",lvl);
+	int nbCharlvlMax; 
+	for(nbCharlvlMax=2; nbCharlvlMax > countNbCharLvl; nbCharlvlMax --) printf(" ");
+	printf(" *\n"); 
+	printf("*       ----------                                                                            *\n");
+	printf("* HP : |"); 
+	for (nblife=0; nblife<ratioHP/10; nblife++)
+		printf("#");
+	for (nblife=0; nblife<10 - (ratioHP/10); nblife++)
+                printf(" ");
+	printf("|                                                                           *\n");
+	printf("*       ----------                                                                            *\n");
 	printf("***********************************************************************************************\n");
-
+	
 	free(name);
 	free(stamina);
 	free(className);
@@ -299,6 +383,8 @@ void printTop(char nameTxt[]) {
 	free(intelect);
 	free(xp);
 	free(lvl);
+	free(hpTotal);
+	free(hpNew);
 	fclose(character);
 }
 /*
@@ -407,11 +493,16 @@ char* getName() {
 	        printf("*                                                   *\n");
 	        printf("*****************************************************\n");
 		exist = 0;
-		i = 1;
-		printf("   Nom du personnage (10 characteres max): ");
+		i = 0;
+		printf("             0. Retourner au menu principal  ");
+		printf("\n\n   Nom du personnage (10 characteres max): ");
 		scanf("%s",name);
 		while(name[i] != '\0') {
 			i++;
+		}
+		if(name[0] == '0')
+		{
+			navigationMenu();
 		}
 		int nbCharacter = getNbCharacter();
 		char ** names = getNamesCharacterFile();
@@ -460,8 +551,9 @@ int getClass() {
 		printf ("                  1. Guerrier\n");
 		printf ("                  2. Mage\n");
 		printf ("                  3. Voleur\n");
+		printf ("\n\n              0. Retour au menu principal\n");
 		scanf("%d",&selectedNumber);
-	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3);
+	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3 && selectedNumber != 0);
 	return selectedNumber;
 }
 
@@ -479,17 +571,21 @@ void creatUser() {
 	int strenght;
 	int intellect;
 	int stamina;
-	int xp = 100;
+	int xp = 1;
 	int lvl =1;
+	int hp = 500;
+	char bag1[]="Popo50";
 	FILE* charactersFile = NULL;
 	charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
 
 	char className[7];
 	int selectedNumber = getClass(); 
+	if(selectedNumber == 0 ) {
+		navigationMenu();
+	}
 	char* name =  getName();
 	
 	char * chaineWithTxt = addTxt(name);
-
 	FILE * characterFile = fopen(chaineWithTxt, "a");
 	if(selectedNumber == 1) { //guerrier
 		className[0] = 'W';
@@ -503,7 +599,7 @@ void creatUser() {
 		agility = 5;
 		strenght = 10;
 		intellect = 5;
-		stamina = 10;
+		stamina = 7;
 	}
 	else if (selectedNumber == 2 ) { //Mage
 		className[0] = 'M';
@@ -529,7 +625,7 @@ void creatUser() {
 		stamina = 7;
 	}
 	if(characterFile != NULL) {
-		fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;\n",name,className,agility,strenght,intellect,stamina,xp,lvl);
+		fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1);
 		fprintf(charactersFile,"%s;",name);
 	}
 	else {
@@ -561,7 +657,6 @@ void printMenu () {
 	printf("*****************************************************\n");
 	printf("                1. Créer un personnage       \n");
 	printf("                2. Selectionner un personnage    \n");
-	printf("                3. generer map    \n");
 	
 
 }
@@ -580,7 +675,7 @@ int getMenu() {
 	return get;
 }
 
-int  selectCharacter() {
+void printAllCharacter() {
 	system("clear");
 	printf("*****************************************************\n");
 	printf("*                                                   *\n");
@@ -588,55 +683,57 @@ int  selectCharacter() {
 	printf("*                                                   *\n");
 	printf("*****************************************************\n");
 	char ** names = getNamesCharacterFile();
-	int nbCharacter = getNbCharacter();
 	int i = 0;
-	int selectedNumber;
+	int nbCharacter = getNbCharacter();
 	if(nbCharacter != 0) {
 		while(i < nbCharacter) {
 			printf("             %d. %s\n",i + 1,names[i]);
 			i ++;
 		}
-		do {	
-			scanf("%d",&selectedNumber);
-		}while(selectedNumber < 0 || selectedNumber > nbCharacter);
 	}else {
 		printf("           Aucun personnage\n");
-		return -1;
+	}
+	printf("\n\n             0. Retour au menu principal\n");
+	i =0;
+	while(i < nbCharacter) {
+		free(names[i]);
+		i++;
 	}
 	free(names);
+}
+int  selectCharacter() {
+	int selectedNumber;
+	printAllCharacter();
+	int nbCharacter = getNbCharacter();
+	do {	
+		scanf("%d",&selectedNumber);
+	}while((selectedNumber < 0 || selectedNumber > nbCharacter) && selectedNumber != 0);
 	return selectedNumber;
 }
-
-
-int main() {
-
-	printMenu();
-	int userChoise = getMenu();
-
-	if(userChoise == 1) {
-		system("clear");
-		creatUser();
-	}
-	else if(userChoise == 2) {
-		int sn = selectCharacter();
-		if(sn == -1 ) {
-			printf("        1.retourner au menu principal\n");
-			int tmp;
-			do {
-				scanf("%d",&tmp);
-			}while(tmp != 1);
-			printMenu();
+void navigationMenu() {
+	
+		printMenu();
+		int userChoise = getMenu();
+		
+		if(userChoise == 1) {
+			creatUser();
 		}
-		//printf("          Vous avez choisis le numéro %d\n",sn);
-		getMap(sn);
-	}
-	else if(userChoise == 3) {
-		//getMap();
-	}
-	else {
+		else if(userChoise == 2) {
+			int sn = selectCharacter();
+			if(sn != 0 ) {
+				getMap(sn);
+			}
+			else {
+			     navigationMenu();
+			}
+		}
+		else {	
+			printf("ERROR");
+		}
 
-		printf("ERROR");
-	}
+}
+int main() {
+	navigationMenu();
 return 0;
 }
 
