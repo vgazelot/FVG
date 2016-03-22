@@ -420,24 +420,29 @@ char * addTxt(char chaine[]) {
  */
 int getNbCharacter() {
 	FILE * charactersFile = fopen ("characters.txt","r");
-	char tmp;
-	int count = 0;
-	int first = 1;
-	do {
-		tmp = fgetc(charactersFile);	
-		if( tmp != EOF) {
-			if(tmp != ';'&& first == 1) {
-				count ++;
-				first = 0;
-			}
-			else {
-				if(tmp == ';') {
-					first = 1;
+	if(charactersFile != NULL) { 
+		char tmp;
+		int count = 0;
+		int first = 1;
+		do {
+			tmp = fgetc(charactersFile);	
+			if( tmp != EOF) {
+				if(tmp != ';'&& first == 1) {
+					count ++;
+					first = 0;
+				}
+				else {
+					if(tmp == ';') {
+						first = 1;
+					}
 				}
 			}
-		}
-	}while(tmp != EOF);
-	return count;
+		}while(tmp != EOF);
+		return count;
+	}
+	else {
+		return 0;
+	}
 
 }
 
@@ -470,14 +475,21 @@ char** getNamesCharacterFile() {
 			}
 		}
 	}while(tmp != EOF);
-
 	return names;
 }
 
+void printGetName() {
+	printf("*****************************************************\n");
+	printf("*                                                   *\n");
+	printf("*               Creation du personnage              *\n");
+	printf("*                                                   *\n");
+	printf("*****************************************************\n");
+	printf("             0. Retourner au menu principal  ");
+	printf("\n\n   Nom du personnage (10 characteres max): ");
+}
 /*
  * Fonction qui permet de demander à l'utilisateur le nom du personnage qu'il veut créer.
  */
-
 char* getName() {
 	int i = 1;
 	int exist = 0;
@@ -487,15 +499,9 @@ char* getName() {
 		if( i > 10) {
 			printf("Nom supérieur a 10 characteres \n" );
 		}
-	        printf("*****************************************************\n");
-	        printf("*                                                   *\n");
-	        printf("*               Creation du personnage              *\n");
-	        printf("*                                                   *\n");
-	        printf("*****************************************************\n");
+		int i = 0;
 		exist = 0;
-		i = 0;
-		printf("             0. Retourner au menu principal  ");
-		printf("\n\n   Nom du personnage (10 characteres max): ");
+		printGetName();
 		scanf("%s",name);
 		while(name[i] != '\0') {
 			i++;
@@ -503,55 +509,62 @@ char* getName() {
 		if(name[0] == '0')
 		{
 			navigationMenu();
+			return NULL;
 		}
-		int nbCharacter = getNbCharacter();
-		char ** names = getNamesCharacterFile();
-		int t = 0; 
-		int diff = 0;
-		while( t < nbCharacter && exist == 0) {
-			int j = 0;
-			int n = 0;
-			diff = 0;
-			while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
-				if( name[n] != names[t][j]) {
-					diff = 1;	
+		else {
+
+			int nbCharacter = getNbCharacter();
+			char ** names = getNamesCharacterFile();
+			int t = 0; 
+			int diff = 0;
+			while( t < nbCharacter && exist == 0) {
+				int j = 0;
+				int n = 0;
+				diff = 0;
+				while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
+					if( name[n] != names[t][j]) {
+						diff = 1;	
+					}
+					j++;
+					n++;
 				}
-				j++;
-				n++;
+				if(diff == 0) {
+					exist = 1;		
+				}
+				t++;
 			}
-			if(diff == 0) {
-				exist = 1;		
+			if(exist == 1 && nbCharacter > 0) {
+				system("clear");
+				printf("/!\\ PERSONNAGE DEJA EXISTANT ! /!\\ \n Veuillez choisir un autre nom.\n");
+				exist = 1;	
 			}
-			t++;
+			free(names);
 		}
-		if(exist == 1 && nbCharacter > 0) {
-			system("clear");
-			printf("/!\\ PERSONNAGE DEJA EXISTANT ! /!\\ \n Veuillez choisir un autre nom.\n");
-			exist = 1;	
-		}
-		free(names);
 	}while(i > 10 || exist == 1);
 	return name;
 }
 
+
+void printAllClass() {
+	printf("*****************************************************\n");
+	printf("*                                                   *\n");
+	printf("*               Choisissez une classe               *\n");
+	printf("*                                                   *\n");
+	printf("*****************************************************\n");
+	printf ("                  1. Guerrier\n");
+	printf ("                  2. Mage\n");
+	printf ("                  3. Voleur\n");
+	printf ("\n\n              0. Retour au menu principal\n");
+}
 /*
  * Fonction qui permet de demmander à l'utilisateur de selectionner une classe (Geurrier, mage, voleur)
  */
-
 int getClass() {
 
 	int selectedNumber;
 	do {
 		system("clear");
-	        printf("*****************************************************\n");
-	        printf("*                                                   *\n");
-	        printf("*               Choisissez une classe               *\n");
-	        printf("*                                                   *\n");
-	        printf("*****************************************************\n");
-		printf ("                  1. Guerrier\n");
-		printf ("                  2. Mage\n");
-		printf ("                  3. Voleur\n");
-		printf ("\n\n              0. Retour au menu principal\n");
+		printAllClass();
 		scanf("%d",&selectedNumber);
 	}while(selectedNumber != 1 && selectedNumber != 2 && selectedNumber != 3 && selectedNumber != 0);
 	return selectedNumber;
@@ -567,80 +580,84 @@ int getClass() {
 void creatUser() {
 	
 	system("clear");	
-	int agility;
-	int strenght;
-	int intellect;
-	int stamina;
-	int xp = 1;
-	int lvl =1;
-	int hp = 500;
-	char bag1[]="Popo50";
-	FILE* charactersFile = NULL;
-	charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
-
-	char className[7];
 	int selectedNumber = getClass(); 
 	if(selectedNumber == 0 ) {
 		navigationMenu();
-	}
-	char* name =  getName();
-	
-	char * chaineWithTxt = addTxt(name);
-	FILE * characterFile = fopen(chaineWithTxt, "a");
-	if(selectedNumber == 1) { //guerrier
-		className[0] = 'W';
-		className[1] = 'a';
-		className[2] = 'r';
-		className[3] = 'r';
-		className[4] = 'i';
-		className[5] = 'o';
-		className[6] = 'r';
-		className[7] = '\0';
-		agility = 5;
-		strenght = 10;
-		intellect = 5;
-		stamina = 7;
-	}
-	else if (selectedNumber == 2 ) { //Mage
-		className[0] = 'M';
-		className[1] = 'a';
-		className[2] = 'g';
-		className[3] = 'e';
-		className[4] = '\0';
-		agility = 5;
-		strenght = 5;
-		intellect = 10;
-		stamina = 7;
-	}
-	else if(selectedNumber == 3) { //Voleur
-		className[0] = 'R';
-		className[1] = 'o';
-		className[2] = 'g';
-		className[3] = 'u';
-		className[4] = 'e';
-		className[5] = '\0';
-		agility = 10;
-		strenght = 5;
-		intellect = 5;
-		stamina = 7;
-	}
-	if(characterFile != NULL) {
-		fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1);
-		fprintf(charactersFile,"%s;",name);
-	}
-	else {
-		printf("Impossible d'ouvrir le fichier characters.txt");
-	}
-	fclose(charactersFile);
-	fclose(characterFile);
-	free(name);
-	printf("Personnage cree !\n");
+	}else
+	{
+		int agility;
+		int strenght;
+		int intellect;
+		int stamina;
+		int xp = 1;
+		int lvl =1;
+		int hp = 500;
+		char bag1[]="Popo50";
+		FILE* charactersFile = NULL;
+		charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
+
+		char className[7];
+		char* name =  getName();
+		if( name == NULL) { //Selection du 0 (go menu) 
+			return;
+		}
+		char * chaineWithTxt = addTxt(name);
+		FILE * characterFile = fopen(chaineWithTxt, "a");
+		if(selectedNumber == 1) { //guerrier
+			className[0] = 'W';
+			className[1] = 'a';
+			className[2] = 'r';
+			className[3] = 'r';
+			className[4] = 'i';
+			className[5] = 'o';
+			className[6] = 'r';
+			className[7] = '\0';
+			agility = 5;
+			strenght = 10;
+			intellect = 5;
+			stamina = 7;
+		}
+		else if (selectedNumber == 2 ) { //Mage
+			className[0] = 'M';
+			className[1] = 'a';
+			className[2] = 'g';
+			className[3] = 'e';
+			className[4] = '\0';
+			agility = 5;
+			strenght = 5;
+			intellect = 10;
+			stamina = 7;
+		}
+		else if(selectedNumber == 3) { //Voleur
+			className[0] = 'R';
+			className[1] = 'o';
+			className[2] = 'g';
+			className[3] = 'u';
+			className[4] = 'e';
+			className[5] = '\0';
+			agility = 10;
+			strenght = 5;
+			intellect = 5;
+			stamina = 7;
+		}
+		if(characterFile != NULL) {
+			fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1);
+			fprintf(charactersFile,"%s;",name);
+		}
+		else {
+			printf("Impossible d'ouvrir le fichier characters.txt");
+		}
+		fclose(charactersFile);
+		fclose(characterFile);
+		free(name);
+		printf("Personnage cree !\n");
+	}//end of else selectedNumber == 0
 }
 
 void getMap(int sn) {
 	system("clear");
 	sn --;
-	char ** names = getNamesCharacterFile();
+	char ** names = getNamesCharacterFile(); //Permet de récuperer les infos du personnage selectionné
 	printTop(addTxt(names[sn]));		
 
 }
@@ -665,13 +682,11 @@ void printMenu () {
  * permet de récuperer la selection de l'utilisateur sur le menu principal
  */
 int getMenu() {
-
 	int get;
 	do {
 		scanf("%d",&get);		
 
 	}while(get != 1 && get !=2 && get != 3);
-
 	return get;
 }
 
@@ -711,10 +726,8 @@ int  selectCharacter() {
 	return selectedNumber;
 }
 void navigationMenu() {
-	
 		printMenu();
 		int userChoise = getMenu();
-		
 		if(userChoise == 1) {
 			creatUser();
 		}
