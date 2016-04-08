@@ -754,12 +754,12 @@ void printMap(char **mapTab,int x, int y) {
 	
 	while( i < 35 ){
 		int j = 0 ;
-		while ( j < 95 ){
-		printf("%c",mapTab[i][j]);	
-		j++;
+		while ( j < 96 ){
+			printf("%c",mapTab[i][j]);	
+			j++;
 		}
-//	printf("\n");
-	i++;
+//		printf("\n");
+		i++;
 	}
 
 }
@@ -770,7 +770,8 @@ char ** getMapFile(char nameMap[]) {
 	map = fopen(nameMapTxt,"r");
 	char ** mapTab = malloc(35*sizeof(char *));
 	int i = 0;
-	while(i < 35)
+	while(i < 35){
+		mapTab[i] = malloc(96*sizeof(char));
 		i++;
 	}
 	if(map != NULL) {
@@ -780,7 +781,7 @@ char ** getMapFile(char nameMap[]) {
 		do {
 			tmp = fgetc(map);
 			if(tmp != EOF) {
-				if(countC < 95) {
+				if(countC < 96) {
 					mapTab[countL][countC] = tmp;
 					countC ++;	
 				}
