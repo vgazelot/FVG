@@ -4,6 +4,8 @@
 
 
 void navigationMenu();
+char ** getMapFile(char nameMap[]);
+void printMap(char **mapTab,int x, int y);
 
 
 char * getNameCharacter(char nameTxt[]) {
@@ -61,10 +63,7 @@ char * getClassName(char nameTxt[]) {
 	else {
 		printf("ERROR");
 	}
-	
-	
 	return className;
-
 }
 
 char * getAgility(char nameTxt[]) {
@@ -411,9 +410,7 @@ char * addTxt(char chaine[]) {
 		i ++;
 		j ++;
 	}
-
 	return chaineWithTxt;
-	
 }
 /*
  *FOnction qui retourne le nombre de personnage dans characters.txt
@@ -658,8 +655,14 @@ void getMap(int sn) {
 	system("clear");
 	sn --;
 	char ** names = getNamesCharacterFile(); //Permet de récuperer les infos du personnage selectionné
-	printTop(addTxt(names[sn]));		
-
+	printTop(addTxt(names[sn]));
+	char ** map = getMapFile("startMap");
+	if(map[0][0] == 'e' &&map[0][1] == 'r' &&map[0][2] == 'r' &&map[0][3] == 'o' &&map[0][4] == 'r' ) {
+		navigationMenu();
+	}
+	else {
+		printMap(map,10,10);
+	}
 }
 	
 /*
@@ -739,11 +742,79 @@ void navigationMenu() {
 			else {
 			     navigationMenu();
 			}
-		}
+		}	
 		else {	
 			printf("ERROR");
 		}
 
+}
+
+void printMap(char **mapTab,int x, int y) {
+	int i = 0;
+	
+	while( i < 35 ){
+		int j = 0 ;
+		while ( j < 95 ){
+		printf("%c",mapTab[i][j]);	
+		j++;
+		}
+//	printf("\n");
+	i++;
+	}
+
+}
+
+char ** getMapFile(char nameMap[]) {
+	FILE * map = NULL; 
+	char * nameMapTxt = addTxt(nameMap);
+	map = fopen(nameMapTxt,"r");
+	char ** mapTab = malloc(35*sizeof(char *));
+	int i = 0;
+	while(i < 35)
+		i++;
+	}
+	if(map != NULL) {
+		char tmp;
+		int countC = 0;
+		int countL = 0;
+		do {
+			tmp = fgetc(map);
+			if(tmp != EOF) {
+				if(countC < 95) {
+					mapTab[countL][countC] = tmp;
+					countC ++;	
+				}
+				else {
+					countL ++;
+					countC = 0;
+					mapTab[countL][countC] = tmp;
+				}
+			} 
+		}while(tmp != '\0' && tmp != EOF);
+		free(nameMapTxt);
+		fclose(map);
+		return mapTab;
+	}
+	else {
+		printf("fichier %s introuvable \n",nameMapTxt);
+		system("sleep 5");
+		i = 0;
+		while(i <35) {
+        	        free(mapTab[i]);
+        	        i++;
+        	}
+		free(mapTab);
+		free(nameMapTxt);
+		fclose(map);
+		char ** perror = malloc(sizeof(char));
+		perror[0] = malloc(5*sizeof(char));
+		perror[0][0] = 'e';
+		perror[0][1] = 'r';
+		perror[0][2] = 'r';
+		perror[0][3] = 'o';
+		perror[0][4] = 'r';
+		return perror;
+	}
 }
 int main() {
 	navigationMenu();
