@@ -800,24 +800,22 @@ char ** getMapFile(char nameMap[]) {
 		return mapTab;
 	}
 	else {
-		printf("fichier %s introuvable \n",nameMapTxt);
-		system("sleep 5");
+		printf("Fichier %s introuvable.\n",nameMapTxt);
+		int j = 5;
+		while(j > 0) {
+			printf("Retour au menu principal dans %ds...\n",j);
+			system("sleep 1");
+			j--;
+		}
 		free(nameMapTxt);
-		fclose(map);
-	/*	char ** perror = malloc(1*sizeof(char*));
+		char ** perror = malloc(1*sizeof(char*));
 		perror[0] = malloc(5*sizeof(char));
 		perror[0][0] = 'e';
 		perror[0][1] = 'r';
 		perror[0][2] = 'r';
 		perror[0][3] = 'o';
 		perror[0][4] = 'r';
-	*/
-		mapTab[0][0] = 'e';
-		mapTab[0][1] = 'r';
-		mapTab[0][2] = 'r';
-		mapTab[0][3] = 'o';
-		mapTab[0][4] = 'r';
-		return mapTab;
+		return perror;
 	}
 }
 int main() {
