@@ -5,7 +5,7 @@
 
 void navigationMenu();
 char ** getMapFile(char nameMap[]);
-void printMap(char **mapTab,int x, int y);
+void printMap(char **mapTab);
 
 
 char * getNameCharacter(char nameTxt[]) {
@@ -657,12 +657,18 @@ void getMap(int sn) {
 	char ** names = getNamesCharacterFile(); //Permet de récuperer les infos du personnage selectionné
 	printTop(addTxt(names[sn]));
 	char ** map = getMapFile("startMap");
+	printf("%c",map[0][0]);
 	if(map[0][0] == 'e' &&map[0][1] == 'r' &&map[0][2] == 'r' &&map[0][3] == 'o' &&map[0][4] == 'r' ) {
 		navigationMenu();
 	}
 	else {
-		printMap(map,10,10);
+		printMap(map);
 	}
+	int i = 0;
+	while(i <35) {
+        	free(map[i]);
+        	i++;
+        }
 }
 	
 /*
@@ -749,19 +755,16 @@ void navigationMenu() {
 
 }
 
-void printMap(char **mapTab,int x, int y) {
+void printMap(char **mapTab) {
 	int i = 0;
-	
 	while( i < 35 ){
 		int j = 0 ;
 		while ( j < 96 ){
 			printf("%c",mapTab[i][j]);	
 			j++;
 		}
-//		printf("\n");
 		i++;
 	}
-
 }
 
 char ** getMapFile(char nameMap[]) {
@@ -799,22 +802,22 @@ char ** getMapFile(char nameMap[]) {
 	else {
 		printf("fichier %s introuvable \n",nameMapTxt);
 		system("sleep 5");
-		i = 0;
-		while(i <35) {
-        	        free(mapTab[i]);
-        	        i++;
-        	}
-		free(mapTab);
 		free(nameMapTxt);
 		fclose(map);
-		char ** perror = malloc(sizeof(char));
+	/*	char ** perror = malloc(1*sizeof(char*));
 		perror[0] = malloc(5*sizeof(char));
 		perror[0][0] = 'e';
 		perror[0][1] = 'r';
 		perror[0][2] = 'r';
 		perror[0][3] = 'o';
 		perror[0][4] = 'r';
-		return perror;
+	*/
+		mapTab[0][0] = 'e';
+		mapTab[0][1] = 'r';
+		mapTab[0][2] = 'r';
+		mapTab[0][3] = 'o';
+		mapTab[0][4] = 'r';
+		return mapTab;
 	}
 }
 int main() {
