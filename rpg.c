@@ -6,6 +6,23 @@
 void navigationMenu();
 char ** getMapFile(char nameMap[]);
 void printMap(char **mapTab);
+void getMap(char name[]);
+char * getMapName( char nameTxt[]);
+void errorFile();
+char ** position(int x,int y,char ** map);
+
+
+char ** position(int x,int y,char ** map) {
+	if (map[x][y] == 'H' || map[x][y] == ' '){
+		
+		
+	}esle{
+		return map;
+	}	
+
+}
+
+
 
 
 char * getNameCharacter(char nameTxt[]) {
@@ -323,24 +340,112 @@ char * getHPNew(char nameTxt[]) {
 	}
 	return hp;
 }
+char * getMapName (char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * map = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 11) {
+				count ++;
+			} 
+			else {
+				if(count == 11 && tmp != ';') {
+					map[i] = tmp;
+					i++;
+				}else if(count == 11 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		map[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return map;
+}
+char * getXCharacter (char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * x = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 12) {
+				count ++;
+			} 
+			else {
+				if(count == 12 && tmp != ';') {
+					x[i] = tmp;
+					i++;
+				}else if(count == 12 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		x[i] = '\0';
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return x;
+}
+char * getYCharacter (char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * y = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 13) {
+				count ++;
+			} 
+			else {
+				if(count == 13 && tmp != ';') {
+					y[i] = tmp;
+					i++;
+				}else if(count == 13 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		y[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return y;
+}
 void printTop(char nameTxt[]) {
 	FILE * character = fopen(nameTxt,"r");
 	char * name = getNameCharacter(nameTxt);
-	//printf("name : %s\n",name);
 	char * className = getClassName(nameTxt);
-	//printf("ClassName : %s\n",className);
 	char * agility = getAgility(nameTxt);
-	//printf("Agility : %s\n",agility);
 	char * strenght = getStrenght(nameTxt);
-	//printf("Strenght : %s\n",strenght);
 	char * intelect= getIntelect(nameTxt);
-	//printf("Intelect : %s\n",intelect);
 	char * stamina= getStamina(nameTxt);
-	//printf("Stamina : %s\n",stamina);
 	char * xp= getXp(nameTxt);
-	//printf("xp : %s\n",xp);
 	char * lvl= getLvl(nameTxt);
-	//printf("lvl : %s\n",lvl);
 	int countNbCharLvl = 0;
 	char * hpTotal = getHPTotal(nameTxt);
 	char * hpNew = getHPNew(nameTxt);
@@ -395,7 +500,7 @@ char * addTxt(char chaine[]) {
 	while(chaine[i] != '\0') {
 		i ++;
 	}
-	char * chaineWithTxt = malloc(i+4 * sizeof(char));
+	char * chaineWithTxt = malloc(i+5 * sizeof(char));
 
 	char txt[] = ".txt";
 	i = 0;
@@ -405,7 +510,7 @@ char * addTxt(char chaine[]) {
 	}
 	int j = i;
 	i = 0;
-	while(i < 4) {
+	while(i < 5) {
 		chaineWithTxt[j] = txt[i];
 		i ++;
 		j ++;
@@ -440,7 +545,6 @@ int getNbCharacter() {
 	else {
 		return 0;
 	}
-
 }
 
 
@@ -456,23 +560,37 @@ char** getNamesCharacterFile() {
 		i ++;
 	}
 	FILE * charactersFile = fopen ("characters.txt","r");
-	char tmp;
-	i = 0;
-	int j= 0;
-	do {
-		tmp = fgetc(charactersFile);	
-		if( tmp != EOF) {
-			if(tmp != ';') {
-				names[i][j] = tmp;
-				j++;
+	if(charactersFile != NULL) {
+		char tmp;
+		i = 0;
+		int j= 0;
+		do {
+			tmp = fgetc(charactersFile);	
+			if( tmp != EOF) {
+				if(tmp != ';') {
+					names[i][j] = tmp;
+					j++;
+				}
+				else{
+					j = 0;
+					i++;
+				}
 			}
-			else{
-				j = 0;
-				i++;
-			}
-		}
-	}while(tmp != EOF);
-	return names;
+		}while(tmp != EOF);
+		return names;
+	}
+	else {
+		free(names);	
+		char ** perror = malloc(1*sizeof(char*));
+		perror[0] = malloc(5*sizeof(char));
+		perror[0][0] = 'e';
+		perror[0][1] = 'r';
+		perror[0][2] = 'r';
+		perror[0][3] = 'o';
+		perror[0][4] = 'r';
+		return perror;
+		
+	}
 }
 
 void printGetName() {
@@ -575,7 +693,6 @@ int getClass() {
  */
 
 void creatUser() {
-	
 	system("clear");	
 	int selectedNumber = getClass(); 
 	if(selectedNumber == 0 ) {
@@ -589,8 +706,11 @@ void creatUser() {
 		int xp = 1;
 		int lvl =1;
 		int hp = 500;
+		char map[] = "startMap";
 		char bag1[]="Popo50";
-		FILE* charactersFile = NULL;
+		int x = 10;
+		int y = 10;
+		FILE * charactersFile = NULL;
 		charactersFile = fopen("characters.txt","a"); // "a" pour ajout en fin de fichier
 
 		char className[7];
@@ -638,37 +758,50 @@ void creatUser() {
 			stamina = 7;
 		}
 		if(characterFile != NULL) {
-			fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1);
+			fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s;%d;%d;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1,map,x,y);
 			fprintf(charactersFile,"%s;",name);
+			fclose(charactersFile);
+			fclose(characterFile);
+			getMap(name);
 		}
 		else {
+			fclose(charactersFile);
+			fclose(characterFile);
 			printf("Impossible d'ouvrir le fichier characters.txt");
+			free(name);
 		}
-		fclose(charactersFile);
-		fclose(characterFile);
-		free(name);
-		printf("Personnage cree !\n");
 	}//end of else selectedNumber == 0
 }
 
-void getMap(int sn) {
+void getMap(char name[]) {
 	system("clear");
-	sn --;
-	char ** names = getNamesCharacterFile(); //Permet de récuperer les infos du personnage selectionné
-	printTop(addTxt(names[sn]));
-	char ** map = getMapFile("startMap");
-	printf("%c",map[0][0]);
-	if(map[0][0] == 'e' &&map[0][1] == 'r' &&map[0][2] == 'r' &&map[0][3] == 'o' &&map[0][4] == 'r' ) {
+	char * nameTxt = addTxt(name);
+	printTop(nameTxt);
+	char * mapName = getMapName(nameTxt);
+	char ** map = getMapFile(mapName);
+	if(map[0][0] == 'e' && map[0][1] == 'r' && map[0][2] == 'r' && map[0][3] == 'o' && map[0][4] == 'r' ) {
+        	free(map[0]);
+		free(map);
+		free(mapName);
+		free(nameTxt);
 		navigationMenu();
 	}
 	else {
+		char * xchar = getXcharacter(nameTxt);
+		char * ychar = getYcharacter(nameTxt);
+		int xint = atoi(xchar);
+		int yint = atoi(ychar);		
+		map = position(int x, int y,map);
 		printMap(map);
+		int i = 0;
+		while(i <35) {
+        		free(map[i]);
+        		i++;
+        	}
+		free(map);
+		free(mapName);
+		free(nameTxt);
 	}
-	int i = 0;
-	while(i <35) {
-        	free(map[i]);
-        	i++;
-        }
 }
 	
 /*
@@ -707,23 +840,46 @@ void printAllCharacter() {
 	printf("*                                                   *\n");
 	printf("*****************************************************\n");
 	char ** names = getNamesCharacterFile();
-	int i = 0;
 	int nbCharacter = getNbCharacter();
-	if(nbCharacter != 0) {
-		while(i < nbCharacter) {
-			printf("             %d. %s\n",i + 1,names[i]);
-			i ++;
+	int true = 0;
+	printf("%s",names);
+	system("sleep 10");
+	if(names[0][0] == 'e' && names[0][1] == 'r' &&names[0][2] == 'r' && names[0][3] == 'o'&&names[0][4] == 'r') {	
+		printf("Fichier characters introuvable.\n");
+		errorFile();
+		navigationMenu();
+	}
+	else {
+		int i = 0;
+		if(nbCharacter != 0) {
+			while(i < nbCharacter) {
+				printf("             %d. %s\n",i + 1,names[i]);
+				i ++;
+			}
+		}else {
+			printf("           Aucun personnage\n");
 		}
-	}else {
-		printf("           Aucun personnage\n");
+		true =1;
+		printf("\n\n             0. Retour au menu principal\n");
 	}
-	printf("\n\n             0. Retour au menu principal\n");
-	i =0;
-	while(i < nbCharacter) {
-		free(names[i]);
-		i++;
+	if(nbCharacter == 0) {
+		if (true == 1 ) { // tout est ok, juste 0 personnage
+			int i =0;
+			while(i < nbCharacter) {
+				free(names[i]);
+				i++;
+			}
+		}
+		free(names[0]);
 	}
-	free(names);
+	else {
+		int i =0;
+		while(i < nbCharacter) {
+			free(names[i]);
+			i++;
+		}
+	}
+		free(names);
 }
 int  selectCharacter() {
 	int selectedNumber;
@@ -743,7 +899,9 @@ void navigationMenu() {
 		else if(userChoise == 2) {
 			int sn = selectCharacter();
 			if(sn != 0 ) {
-				getMap(sn);
+				sn --;
+				char ** names = getNamesCharacterFile();
+				getMap(names[sn]);
 			}
 			else {
 			     navigationMenu();
@@ -766,7 +924,15 @@ void printMap(char **mapTab) {
 		i++;
 	}
 }
+void errorFile() {
 
+		int j = 5;
+		while(j > 0) {
+			printf("Retour au menu principal dans %ds...\n",j);
+			system("sleep 1");
+			j--;
+		}
+}
 char ** getMapFile(char nameMap[]) {
 	FILE * map = NULL; 
 	char * nameMapTxt = addTxt(nameMap);
@@ -801,12 +967,7 @@ char ** getMapFile(char nameMap[]) {
 	}
 	else {
 		printf("Fichier %s introuvable.\n",nameMapTxt);
-		int j = 5;
-		while(j > 0) {
-			printf("Retour au menu principal dans %ds...\n",j);
-			system("sleep 1");
-			j--;
-		}
+		errorFile();
 		free(nameMapTxt);
 		char ** perror = malloc(1*sizeof(char*));
 		perror[0] = malloc(5*sizeof(char));
