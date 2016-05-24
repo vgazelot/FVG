@@ -2,24 +2,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 void navigationMenu();
 char ** getMapFile(char nameMap[]);
 void printMap(char **mapTab);
-void getMap(char name[]);
+void play(char name[]);
 char * getMapName( char nameTxt[]);
 void errorFile();
-char ** position(int x,int y,char ** map);
+char ** mapWithMen(int x,int y,char ** map);
+char * getXCharacter (char nameTxt[]);
+char * getYCharacter (char nameTxt[]);
 
-
-char ** position(int x,int y,char ** map) {
-	if (map[x][y] == 'H' || map[x][y] == ' '){
-		
-		
-	}esle{
+char ** mapWithMen(int x,int y,char ** map) {
+	if ((map[x][y] == 'H' || map[x][y] == ' ') &&
+		(map[x][y+1] == 'H' || map[x][y+1] == ' ') &&
+			(map[x-1][y+1] == 'H' || map[x-1][y+1] == ' ') &&
+				(map[x+1][y+1] == 'H' || map[x+1][y+1] == ' ') &&
+					(map[x][y+2] == 'H' || map[x][y+2] == ' ')){
+		map[y][x] = 'o';
+		map[y+1][x] = 'I';
+		map[y+1][x+1] = '-';
+		map[y+1][x-1] = '-';
+		map[y+2][x] = '^';
+		return map;
+	}
+	else{
 		return map;
 	}	
-
 }
 
 
@@ -355,7 +363,7 @@ char * getMapName (char nameTxt[]) {
 				count ++;
 			} 
 			else {
-				if(count == 11 && tmp != ';') {
+				if(count == 11 && tmp != ';') {	
 					map[i] = tmp;
 					i++;
 				}else if(count == 11 && tmp == ';') {
@@ -435,6 +443,62 @@ char * getYCharacter (char nameTxt[]) {
 		printf("ERROR");
 	}
 	return y;
+}
+void setCharacter (char nameTxt[],char y[],int nb) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	FILE * tmpFile = fopen("tmp.txt","w");
+	if(character != NULL && tmpFile != NULL) {
+		char tmpChar;
+		do {
+			tmpChar = fgetc(character);
+			if(tmpChar != EOF)  {
+				fputc(tmpChar,tmpFile);
+			}
+		}while(tmpChar != EOF);
+		fclose(tmpFile);
+		fclose(character);
+		character = fopen(nameTxt,"w");
+		tmpFile = fopen("tmp.txt","r");
+		int count = 0; 
+		if(tmpFile != NULL && character != NULL) {
+			do {
+				tmpChar = fgetc(tmpFile);
+				if(tmpChar == ';' && tmpChar != EOF) {
+					count ++;
+				}
+				if(count == nb) {
+					int i = 0;
+					fputc(';',character);
+					while(y[i] != '\0') {
+						printf("y : %c\n",y[i]);
+						fputc(y[i],character);
+						i ++;
+					}
+					do {
+						tmpChar = fgetc(tmpFile);
+					}while(tmpChar != ';');
+					printf("tmpCHar : %c count : %d\n",tmpChar,count);
+					count ++;
+					fputc(';',character);
+				}
+				else if(tmpChar != EOF) {
+					fputc(tmpChar,character);
+				}
+				else{
+					fputc(EOF,character);	
+				}
+
+			}while(tmpChar != EOF);
+			fclose(tmpFile);
+			fclose(character);
+		}else {
+			printf("ERROR");
+		}
+	}
+	else {
+		printf("ERROR");
+	}
 }
 void printTop(char nameTxt[]) {
 	FILE * character = fopen(nameTxt,"r");
@@ -609,54 +673,67 @@ char* getName() {
 	int i = 1;
 	int exist = 0;
 	char * name = malloc(100 * sizeof(char));
-	do {
-		system("clear");
-		if( i > 10) {
-			printf("Nom supérieur a 10 characteres \n" );
-		}
-		int i = 0;
-		exist = 0;
-		printGetName();
-		scanf("%s",name);
-		while(name[i] != '\0') {
-			i++;
-		}
-		if(name[0] == '0')
-		{
-			navigationMenu();
-			return NULL;
-		}
-		else {
-
-			int nbCharacter = getNbCharacter();
-			char ** names = getNamesCharacterFile();
-			int t = 0; 
-			int diff = 0;
-			while( t < nbCharacter && exist == 0) {
+	if(name != NULL)
+	{
+		do {
+			system("clear");
+			if( i > 10) {
+				printf("Nom supérieur a 10 characteres \n" );
+			}
+			int i = 0;
+			exist = 0;
+			printGetName();
+			scanf("%s",name);
+			while(name[i] != '\0') {
+				i++;
+			}
+			if(name[0] == '0')
+			{
+				navigationMenu();
+				return NULL;
+			}
+			else {
+				
 				int j = 0;
-				int n = 0;
-				diff = 0;
-				while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
-					if( name[n] != names[t][j]) {
-						diff = 1;	
+				while(j < sizeof(name)){
+					if(name[j] == ';' || name[j] == ' ' || name[j] == ',' || name[j] == ':' || name[j] == '!' || name[j] == '.' || name[j] == '?') {
+						name[j]='_';
 					}
 					j++;
-					n++;
+				}	
+				int nbCharacter = getNbCharacter();
+				char ** names = getNamesCharacterFile();
+				int t = 0; 
+				int diff = 0;
+				while( t < nbCharacter && exist == 0) {
+					int j = 0;
+					int n = 0;
+					diff = 0;
+					while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
+						if( name[n] != names[t][j]) {
+							diff = 1;	
+						}
+						j++;
+						n++;
+					}
+					if(diff == 0) {
+						exist = 1;		
+					}
+					t++;
 				}
-				if(diff == 0) {
-					exist = 1;		
+				if(exist == 1 && nbCharacter > 0) {
+					system("clear");
+					printf("/!\\ PERSONNAGE DEJA EXISTANT ! /!\\ \n Veuillez choisir un autre nom.\n");
+					exist = 1;	
 				}
-				t++;
+				free(names);
 			}
-			if(exist == 1 && nbCharacter > 0) {
-				system("clear");
-				printf("/!\\ PERSONNAGE DEJA EXISTANT ! /!\\ \n Veuillez choisir un autre nom.\n");
-				exist = 1;	
-			}
-			free(names);
-		}
-	}while(i > 10 || exist == 1);
+		}while(i > 10 || exist == 1);
 	return name;
+	}
+	else {
+		exit(0);
+	}
 }
 
 
@@ -762,7 +839,7 @@ void creatUser() {
 			fprintf(charactersFile,"%s;",name);
 			fclose(charactersFile);
 			fclose(characterFile);
-			getMap(name);
+			play(name);
 		}
 		else {
 			fclose(charactersFile);
@@ -773,10 +850,66 @@ void creatUser() {
 	}//end of else selectedNumber == 0
 }
 
-void getMap(char name[]) {
-	system("clear");
+
+/*
+ * Fonction qui permet de récuperer l'action du jouer (déplacement du personnage)
+ */
+char userAction() {
+	int boolean = 0;
+	char action = NULL;
+	while (boolean == 0) {
+		scanf("%c",&action);
+		if(action == 'd' || action == 's' || action == 'q' || action == 'z' || action == 'e') {
+			boolean = 1;
+		}
+	}
+	return action;	
+}
+
+/*
+ * Fonction qui permet de bouger le perssonage dans le tableau map
+ */
+void deplacement(char action, char * nameTxt, char ** map) {
+//	FILE * charcterFile = fopen(nameTxt,"w+"); 		
+	char * xchar = getXCharacter(nameTxt);
+	char * ychar = getYCharacter(nameTxt);
+	int x = atoi(xchar);
+	int y = atoi(ychar);		
+	if (action == 'z') {
+		y = y -1;	
+	}
+	else if(action == 'q') {
+		x = x - 1;
+	}
+	else if(action == 's') {
+		y = y + 1;
+	}
+	else if(action == 'd') {
+		x = x + 1;
+	}else {
+		return;	
+	}
+
+		char yIntToChar[10]; 
+		sprintf(yIntToChar,"%d",y);
+		char xIntToChar[10]; 
+		sprintf(xIntToChar,"%d",x);
+		setCharacter(nameTxt,xIntToChar,12);
+		setCharacter(nameTxt,yIntToChar,13);
+//todo : corriger ce test, ne passe pas alors que le bonhomme est au pleins millieu de la map
+// 	Plus correction erreur segmentation au bou d'un moment lorsque l'on se déplace :(
+/*	if ((map[x][y] == 'H' || map[x][y] == ' ') &&
+		(map[x][y+1] == 'H' || map[x][y+1] == ' ') &&
+			(map[x-1][y+1] == 'H' || map[x-1][y+1] == ' ') &&
+				(map[x+1][y+1] == 'H' || map[x+1][y+1] == ' ') &&
+					(map[x][y+2] == 'H' || map[x][y+2] == ' ')){
+	}*/
+}
+/*
+ * Fonction principal, celle qui va faire tourner le jeu
+ */
+void play(char name[]) {
 	char * nameTxt = addTxt(name);
-	printTop(nameTxt);
 	char * mapName = getMapName(nameTxt);
 	char ** map = getMapFile(mapName);
 	if(map[0][0] == 'e' && map[0][1] == 'r' && map[0][2] == 'r' && map[0][3] == 'o' && map[0][4] == 'r' ) {
@@ -787,20 +920,29 @@ void getMap(char name[]) {
 		navigationMenu();
 	}
 	else {
-		char * xchar = getXcharacter(nameTxt);
-		char * ychar = getYcharacter(nameTxt);
+		system("clear");
+		printTop(nameTxt);
+		char * xchar = getXCharacter(nameTxt);
+		char * ychar = getYCharacter(nameTxt);
 		int xint = atoi(xchar);
 		int yint = atoi(ychar);		
-		map = position(int x, int y,map);
+		map = mapWithMen(xint ,yint, map);
 		printMap(map);
+		char action = userAction();
+		deplacement(action,nameTxt,map);		
+		
+		//on clear tous les mallocs
 		int i = 0;
 		while(i <35) {
         		free(map[i]);
         		i++;
         	}
+		free(xchar);
+		free(ychar);
 		free(map);
 		free(mapName);
 		free(nameTxt);
+		play(name);	
 	}
 }
 	
@@ -842,8 +984,6 @@ void printAllCharacter() {
 	char ** names = getNamesCharacterFile();
 	int nbCharacter = getNbCharacter();
 	int true = 0;
-	printf("%s",names);
-	system("sleep 10");
 	if(names[0][0] == 'e' && names[0][1] == 'r' &&names[0][2] == 'r' && names[0][3] == 'o'&&names[0][4] == 'r') {	
 		printf("Fichier characters introuvable.\n");
 		errorFile();
@@ -901,7 +1041,7 @@ void navigationMenu() {
 			if(sn != 0 ) {
 				sn --;
 				char ** names = getNamesCharacterFile();
-				getMap(names[sn]);
+				play(names[sn]);
 			}
 			else {
 			     navigationMenu();
