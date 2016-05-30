@@ -13,11 +13,11 @@ char * getXCharacter (char nameTxt[]);
 char * getYCharacter (char nameTxt[]);
 
 char ** mapWithMen(int x,int y,char ** map) {
-	if ((map[x][y] == 'H' || map[x][y] == ' ') &&
-		(map[x][y+1] == 'H' || map[x][y+1] == ' ') &&
-			(map[x-1][y+1] == 'H' || map[x-1][y+1] == ' ') &&
-				(map[x+1][y+1] == 'H' || map[x+1][y+1] == ' ') &&
-					(map[x][y+2] == 'H' || map[x][y+2] == ' ')){
+	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
+		(map[y+1][x] == 'H' || map[y+1][x] == ' ') &&
+			(map[y+1][x+1] == 'H' || map[y+1][x+1] == ' ') &&
+				(map[y+1][x-1] == 'H' || map[y+1][x-1] == ' ') &&
+					(map[y+2][x] == 'H' || map[y+2][x] == ' ')){
 		map[y][x] = 'o';
 		map[y+1][x] = 'I';
 		map[y+1][x+1] = '-';
@@ -471,22 +471,17 @@ void setCharacter (char nameTxt[],char y[],int nb) {
 					int i = 0;
 					fputc(';',character);
 					while(y[i] != '\0') {
-						printf("y : %c\n",y[i]);
 						fputc(y[i],character);
 						i ++;
 					}
 					do {
 						tmpChar = fgetc(tmpFile);
 					}while(tmpChar != ';');
-					printf("tmpCHar : %c count : %d\n",tmpChar,count);
 					count ++;
 					fputc(';',character);
 				}
 				else if(tmpChar != EOF) {
 					fputc(tmpChar,character);
-				}
-				else{
-					fputc(EOF,character);	
 				}
 
 			}while(tmpChar != EOF);
@@ -875,6 +870,11 @@ void deplacement(char action, char * nameTxt, char ** map) {
 	char * ychar = getYCharacter(nameTxt);
 	int x = atoi(xchar);
 	int y = atoi(ychar);		
+	map[y][x] = ' ';
+	map[y+1][x] = ' ';
+	map[y+1][x+1] = ' ';
+	map[y+1][x-1] = ' ';
+	map[y+2][x] = ' ';
 	if (action == 'z') {
 		y = y -1;	
 	}
@@ -889,21 +889,23 @@ void deplacement(char action, char * nameTxt, char ** map) {
 	}else {
 		return;	
 	}
-
+	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
+		(map[y+1][x] == 'H' || map[y+1][x] == ' ') &&
+			(map[y+1][x+1] == 'H' || map[y+1][x+1] == ' ') &&
+				(map[y+1][x-1] == 'H' || map[y+1][x-1] == ' ') &&
+					(map[y+2][x] == 'H' || map[y+2][x] == ' ')){
 		char yIntToChar[10]; 
 		sprintf(yIntToChar,"%d",y);
 		char xIntToChar[10]; 
 		sprintf(xIntToChar,"%d",x);
 		setCharacter(nameTxt,xIntToChar,12);
 		setCharacter(nameTxt,yIntToChar,13);
-//todo : corriger ce test, ne passe pas alors que le bonhomme est au pleins millieu de la map
-// 	Plus correction erreur segmentation au bou d'un moment lorsque l'on se déplace :(
-/*	if ((map[x][y] == 'H' || map[x][y] == ' ') &&
-		(map[x][y+1] == 'H' || map[x][y+1] == ' ') &&
-			(map[x-1][y+1] == 'H' || map[x-1][y+1] == ' ') &&
-				(map[x+1][y+1] == 'H' || map[x+1][y+1] == ' ') &&
-					(map[x][y+2] == 'H' || map[x][y+2] == ' ')){
-	}*/
+	}
+	else if(map[y][x] == '1' ) {
+		setCharacter(nameTxt,"maison1",11);
+		setCharacter(nameTxt,"10",12);
+		setCharacter(nameTxt,"10",13);
+	}
 }
 /*
  * Fonction principal, celle qui va faire tourner le jeu
