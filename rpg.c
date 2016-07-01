@@ -1059,6 +1059,10 @@ char* getName() {
 					int j = 0;
 					int n = 0;
 					diff = 0;
+					int c = 0;
+					while(names[t][c] != '\0') {
+						c++;
+					}
 					while(names[t][j] != '\0' && diff == 0 && name[n] != '\0') {
 						if( name[n] != names[t][j]) {
 							diff = 1;	
@@ -1066,7 +1070,7 @@ char* getName() {
 						j++;
 						n++;
 					}
-					if(diff == 0) {
+					if(diff == 0 && n == c) {
 						exist = 1;		
 					}
 					t++;
@@ -1627,9 +1631,11 @@ void play(char name[]) {
 					dep = 1;
 				}
 				else if (action == 1) {
-					printf("Action 1\n");
 					save(user,quests);
 					dep = 1;
+				}
+				else if (action == 3) {
+					save(user,quests);
 				}
 			}
 			int i = 0;
@@ -1665,12 +1671,21 @@ int getActionMenuInGame() {
 	int action;
 	do {
 		scanf("%d",&action);
-	}while(action > 2 || action < 0);
+	}while(action > 3 || action < 0);
 	return action;	
 }
 void printMenuInGame() {
 	system("clear");
-	printf("****************************************************\n*                     Menu                          *\n*****************************************************\n*                   1.Sauvegarder                   *\n*                   2.Quitter                       *\n*                                                   *\n*                                                   *\n*                                                   *\n*                   0.Continuer                     *\n*****************************************************\n");
+	printf("*****************************************************\n");
+        printf("*                     Menu                          *\n");
+        printf("*****************************************************\n");
+        printf("*               1.Sauvegarder                       *\n");
+        printf("*               2.Quitter                           *\n");
+        printf("*               3.Sauvegarder & quitter             *\n");
+        printf("*                                                   *\n");
+        printf("*                                                   *\n");
+        printf("*               0.Continuer                         *\n");
+        printf("*****************************************************\n");
 }
 	
 /*
