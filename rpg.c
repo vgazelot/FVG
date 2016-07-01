@@ -144,12 +144,10 @@ char * getMissionQuest(char questFile[], int id) {
 			tmp = fgetc(quests);
 			if(tmp == '\n') {
 				j++;
-				printf("ligne : %d\n",j);
 			}
 		}
 		do {
 			tmp = fgetc(quests);
-			printf("tmp passe : %c\n",tmp);
 		}while(tmp != ';' && tmp == EOF);
 		tmp = fgetc(quests);
 		if(tmp != EOF) {
@@ -157,7 +155,6 @@ char * getMissionQuest(char questFile[], int id) {
 				tmp = fgetc(quests);
 				if(((tmp >= 48 && tmp <= 122) || tmp == 32 ) && tmp != 59) {
 					mission[i] = tmp;
-					printf("tmp accepté : %c\n",tmp);
 					i++;
 				}else {
 					c =0;
@@ -165,12 +162,11 @@ char * getMissionQuest(char questFile[], int id) {
 			}while(c == 1);
 			
 			mission[i] = '\0';	
-			printf("mission : %s\n",mission);
 		}
 		fclose(quests);
 	}
 	else {
-		printf("ERROR");
+		printf("ERROR OPEN QUEST MISSION\n");
 	}
 	return mission;
 }
@@ -211,7 +207,7 @@ char * getStartQuest(char questFile[],int id) {
 		fclose(quests);
 	}
 	else {
-		printf("ERROR");
+		printf("ERROR open quest start\n");
 	}
 	return start;
 }
@@ -253,7 +249,7 @@ char * getEndQuest(char questFile[],int id) {
 		fclose(quests);
 	}
 	else {
-		printf("ERROR");
+		printf("ERROR OPEN END \n");
 	}
 	return end;
 }
@@ -294,7 +290,7 @@ char * getStatusQuest(char questFile[],int id) {
 		fclose(quests);
 	}
 	else {
-		printf("ERROR");
+		printf("ERROR open quest status\n");
 	}
 	return status;
 }
@@ -928,6 +924,7 @@ char * addQuestTxt( char chaine[]) {
 		i ++;
 		j ++;
 	}
+	chaineWithQuestTxt[j] = '\0';
 	return chaineWithQuestTxt;
 
 }
@@ -1591,7 +1588,6 @@ void play(char name[]) {
 			j++;
 		}
 		quests[i].mission[j] = '\0';
-		printf("%s\n", quests[0].mission);
 		quests[i].start = atoi(start);
 		quests[i].end = atoi(end);
 		quests[i].status= atoi(status);
