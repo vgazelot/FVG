@@ -2,15 +2,303 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Character Character;
+
+typedef struct Quest Quest;
+
+
 void navigationMenu();
-char ** getMapFile(char nameMap[]);
-void printMap(char **mapTab);
+char ** getMapFile(char mapName[]);
+void printMap(char **mapTab, Character* user,Quest* quests);
 void play(char name[]);
 char * getMapName( char nameTxt[]);
 void errorFile();
 char ** mapWithMen(int x,int y,char ** map);
 char * getXCharacter (char nameTxt[]);
 char * getYCharacter (char nameTxt[]);
+void creatQuest( char name[]);
+char * addQuestTxt(char chaine[]);
+char * addTxt(char chaine[]);
+void addQuest(char name[],int nb, char chaine[],char nbStart[], char nbEnd[]);
+int QuestIsDone(char name[],int nbQuest);
+char * getQuestMission(char name[],int nb);  
+struct Character* getUser(char name[]);
+
+char * getClassName(char nameTxt[]);  
+char * getAgility(char nameTxt[]);
+char * getStrenght(char nameTxt[]);
+char * getIntelect(char nameTxt[]);
+char * getStamina(char nameTxt[]);
+char * getXp(char nameTxt[]);
+char * getLvl(char nameTxt[]);
+char * getHPTotal(char nameTxt[]);
+char * getHPNew(char nameTxt[]);
+char * getMapName (char nameTxt[]);
+char * getDialog (char nameTxt[]);
+
+void printMenuInGame();
+int getActionMenuInGame();
+
+void save(Character* user, Quest* quests);
+
+
+
+struct Character {
+	char name[10];
+	char className[10];
+	int agility;
+	int strenght;
+	int intellect;
+	int stamina;
+	int xp;
+	int lvl;
+	int hp;
+	int hpMax;
+	char map[100] ;
+	char bag1[100];
+	int x;
+	int y;
+	char dial[30];
+
+};
+struct Quest {
+	int id;
+	char mission[100];
+	int start;
+	int end;
+	int status;	
+};
+
+Character* getUser(char name[]) {
+	Character user;
+	Character* pUser = malloc(sizeof(user));
+	char* nameWithTxt = addTxt(name);
+	int i = 0;
+	while(name[i] != '\0') {
+		pUser->name[i] = name[i];
+	 	i++;	
+	}
+	pUser->name[i] = '\0';
+	char* className = getClassName(nameWithTxt);
+	i =0;
+	while(className[i] != '\0') {
+		pUser->className[i] = className[i];
+	 	i++;	
+	}
+	pUser->agility = atoi(getAgility(nameWithTxt));
+	pUser->strenght = atoi(getStrenght(nameWithTxt));
+	pUser->intellect = atoi(getIntelect(nameWithTxt));
+	pUser->stamina = atoi(getStamina(nameWithTxt));
+	pUser->xp = atoi(getXp(nameWithTxt));
+	pUser->lvl = atoi(getLvl(nameWithTxt));
+	pUser->hp = atoi(getHPNew(nameWithTxt));
+	pUser->hpMax = atoi(getHPTotal(nameWithTxt));
+	char* map = getMapName(nameWithTxt);
+	i =0;
+	while(map[i] != '\0') {
+		pUser->map[i] = map[i];
+	 	i++;	
+	}
+	pUser->map[i] = '\0';
+//	pUser->bag1[100];
+	pUser->x = atoi(getXCharacter(nameWithTxt));
+	pUser->y = atoi(getYCharacter(nameWithTxt));
+	char* dial = getDialog(nameWithTxt);
+	i =0;
+	while(map[i] != '\0') {
+		pUser->dial[i] = dial[i];
+	 	i++;	
+	}
+	pUser->dial[i] = '\0';
+	return pUser;
+}
+
+Quest * initQuest(int id,char mission[],int start, int end, int status) {
+	Quest tquest;
+	Quest * pQuest = malloc(sizeof(tquest));
+	pQuest->id = id;
+	int i =0;
+	while(mission[i] != '\0') {
+		pQuest->mission[i] = mission[i];
+	 	i++;	
+	}
+	pQuest->mission[i] = '\0';
+	pQuest->start = start;
+	pQuest->end = end;
+	pQuest->status = status;
+	return pQuest;
+}
+
+
+char * getMissionQuest(char questFile[], int id) {
+	FILE * quests = NULL;
+	quests =  fopen(questFile,"r");
+	int c = 1;
+	int count = 0;
+	char * mission = malloc(100*sizeof(char));
+	if(quests != NULL) {
+		int i = 0;
+		char tmp;
+		int j = 1;
+		while (j < id) {
+			tmp = fgetc(quests);
+			if(tmp == '\n') {
+				j++;
+				printf("ligne : %d\n",j);
+			}
+		}
+		do {
+			tmp = fgetc(quests);
+			printf("tmp passe : %c\n",tmp);
+		}while(tmp != ';' && tmp == EOF);
+		tmp = fgetc(quests);
+		if(tmp != EOF) {
+			do {
+				tmp = fgetc(quests);
+				if(((tmp >= 48 && tmp <= 122) || tmp == 32 ) && tmp != 59) {
+					mission[i] = tmp;
+					printf("tmp accepté : %c\n",tmp);
+					i++;
+				}else {
+					c =0;
+				} 
+			}while(c == 1);
+			
+			mission[i] = '\0';	
+			printf("mission : %s\n",mission);
+		}
+		fclose(quests);
+	}
+	else {
+		printf("ERROR");
+	}
+	return mission;
+}
+char * getStartQuest(char questFile[],int id) {
+	FILE * quests = NULL;
+	quests =  fopen(questFile,"r");
+	int c = 1;
+	int count =1 ;
+	char * start = malloc(3*sizeof(char));
+	if(quests != NULL) {
+		int i = 0;
+		char tmp;
+		int j = 1;
+		while (j < id) {
+			tmp = fgetc(quests);
+			if(tmp == '\n') {
+				j++;
+			}
+		}
+		do {
+			tmp = fgetc(quests);
+			if(tmp == ';' && count < 2) {
+				count ++;
+			} 
+			else {
+				if(count == 2 && tmp != ';' && i <3) {
+					start[i] = tmp;
+					i++;
+				}else if((count == 2 && tmp == ';') || i>= 3) {
+					c = 0;
+				}else if (i > 3) {
+					c = 0;
+				}
+			}
+			
+		}while(c == 1);
+		start[i] = '\0';
+		fclose(quests);
+	}
+	else {
+		printf("ERROR");
+	}
+	return start;
+}
+
+char * getEndQuest(char questFile[],int id) {
+	FILE * quests = NULL;
+	quests =  fopen(questFile,"r");
+	int c = 1;
+	int count = 0;
+	char * end = malloc(3*sizeof(char));
+	if(quests != NULL) {
+		int i = 0;
+		char tmp;
+		int j = 1;
+		while (j < id) {
+			tmp = fgetc(quests);
+			if(tmp == '\n') {
+				j++;
+			}
+		}
+		do {
+			tmp = fgetc(quests);
+			if(tmp == ';' && count < 3) {
+				count ++;
+			} 
+			else {
+				if(count == 3 && tmp != ';' && i < 3) {
+					end[i] = tmp;
+					i++;
+				}else if((count == 3 && tmp == ';') || i>= 3) {
+					c = 0;
+				}else if (i > 3) {
+					c = 0;
+				}
+			}
+			
+		}while(c == 1);
+		end[i] = '\0';	
+		fclose(quests);
+	}
+	else {
+		printf("ERROR");
+	}
+	return end;
+}
+char * getStatusQuest(char questFile[],int id) {
+	FILE * quests = NULL;
+	quests =  fopen(questFile,"r");
+	int c = 1;
+	int count = 0;
+	char * status = malloc(3*sizeof(char));
+	if(quests != NULL) {
+		int i = 0;
+		char tmp;
+		int j = 1;
+		while (j < id) {
+			tmp = fgetc(quests);
+			if(tmp == '\n') {
+				j++;
+			}
+		}
+		do {
+			tmp = fgetc(quests);
+			if(tmp == ';' && count < 4) {
+				count ++;
+			} 
+			else {
+				if(count == 4 && tmp != ';' && i < 3) {
+					status[i] = tmp;
+					i++;
+				}else if((count == 4 && tmp == ';') || i>= 3) {
+					c = 0;
+				}else if (i > 3) {
+					c = 0;
+				}
+			}
+			
+		}while(c == 1);
+		status[i] = '\0';	
+		fclose(quests);
+	}
+	else {
+		printf("ERROR");
+	}
+	return status;
+}
+
 
 char ** mapWithMen(int x,int y,char ** map) {
 	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
@@ -380,6 +668,38 @@ char * getMapName (char nameTxt[]) {
 	}
 	return map;
 }
+char * getDialog (char nameTxt[]) {
+	FILE * character = NULL;
+	character =  fopen(nameTxt,"r");
+	int c = 1;
+	int count = 0;
+	char * map = malloc(10*sizeof(char)); 
+	if(character != NULL) {
+		int i = 0;
+		char tmp;
+		do {
+			tmp = fgetc(character);
+			if(tmp == ';' && count < 14) {
+				count ++;
+			} 
+			else {
+				if(count == 14 && tmp != ';') {	
+					map[i] = tmp;
+					i++;
+				}else if(count == 14 && tmp == ';') {
+					c = 0;
+				}	
+			}
+			
+		}while(c == 1);
+		map[i] = '\0';	
+		fclose(character);
+	}
+	else {
+		printf("ERROR");
+	}
+	return map;
+}
 char * getXCharacter (char nameTxt[]) {
 	FILE * character = NULL;
 	character =  fopen(nameTxt,"r");
@@ -495,8 +815,8 @@ void setCharacter (char nameTxt[],char y[],int nb) {
 		printf("ERROR");
 	}
 }
-void printTop(char nameTxt[]) {
-	FILE * character = fopen(nameTxt,"r");
+void printTop(Character * user) {
+	/*FILE * character = fopen(nameTxt,"r");
 	char * name = getNameCharacter(nameTxt);
 	char * className = getClassName(nameTxt);
 	char * agility = getAgility(nameTxt);
@@ -512,32 +832,38 @@ void printTop(char nameTxt[]) {
 	int hpNewInt = atoi(hpNew);
 	int nblife = 0;
 	int ratioHP = ( hpNewInt * 100) / hpTotalInt;
+	
 	while(lvl[countNbCharLvl] != '\0') {
 		countNbCharLvl ++;
-	}
+	}*/
+	int ratioHP = ( user->hp *100) / user->hpMax;
 	int nbCharName = 0;
-	while (name[nbCharName] != '\0') {
+	while (user->name[nbCharName] != '\0') {
 		nbCharName ++;
 	}
 	printf("***********************************************************************************************\n");
 	printf("*                                                                                             *\n");
-	printf("* Name : %s",name);
+	printf("* Name : %s",user->name);
 	int j;
 	for(j=10; j> nbCharName ;j--) printf(" ");
-	printf("                                                                  LvL : %s",lvl);
-	int nbCharlvlMax; 
-	for(nbCharlvlMax=2; nbCharlvlMax > countNbCharLvl; nbCharlvlMax --) printf(" ");
+	printf("                                                                  LvL : %d",user->lvl);
+	//int nbCharlvlMax; 
+	//for(nbCharlvlMax=2; nbCharlvlMax > countNbCharLvl; nbCharlvlMax --) printf(" ");
+	if(user->lvl <10) {
+		printf(" ");
+	}
 	printf(" *\n"); 
 	printf("*       ----------                                                                            *\n");
 	printf("* HP : |"); 
-	for (nblife=0; nblife<ratioHP/10; nblife++)
+	int nbLife;
+	for (nbLife=0; nbLife<ratioHP/10; nbLife++)
 		printf("#");
-	for (nblife=0; nblife<10 - (ratioHP/10); nblife++)
+	for (nbLife=0; nbLife<10 - (ratioHP/10); nbLife++)
                 printf(" ");
 	printf("|                                                                           *\n");
 	printf("*       ----------                                                                            *\n");
 	printf("***********************************************************************************************\n");
-	
+/*	
 	free(name);
 	free(stamina);
 	free(className);
@@ -549,9 +875,10 @@ void printTop(char nameTxt[]) {
 	free(hpTotal);
 	free(hpNew);
 	fclose(character);
+*/
 }
 /*
- * Fonction qui rajout ".txt" à la chaine mis en parametre
+ * Fonction qui rajout ".txt" à la chaine mise en parametre
  */
 
 char * addTxt(char chaine[]) {
@@ -559,22 +886,50 @@ char * addTxt(char chaine[]) {
 	while(chaine[i] != '\0') {
 		i ++;
 	}
-	char * chaineWithTxt = malloc(i+5 * sizeof(char));
+	char * chainewithtxt = malloc(i+5 * sizeof(char));
 
 	char txt[] = ".txt";
 	i = 0;
 	while(chaine[i] != '\0') {
-		chaineWithTxt[i] = chaine[i];
+		chainewithtxt[i] = chaine[i];
 		i ++;
 	}
 	int j = i;
 	i = 0;
 	while(i < 5) {
-		chaineWithTxt[j] = txt[i];
+		chainewithtxt[j] = txt[i];
 		i ++;
 		j ++;
 	}
-	return chaineWithTxt;
+	return chainewithtxt;
+}
+
+/*
+ * Fonction qui permet de renvoyer une chaine contenant "Quest.txt" à la fin de la chaine mise en paramètre
+ */
+char * addQuestTxt( char chaine[]) {
+	
+	int i = 0;
+	while(chaine[i] != '\0') {
+		i ++;
+	}
+	char * chaineWithQuestTxt = malloc(i+9 * sizeof(char));
+
+	char txt[] = "Quest.txt";
+	i = 0;
+	while(chaine[i] != '\0') {
+		chaineWithQuestTxt[i] = chaine[i];
+		i ++;
+	}
+	int j = i;
+	i = 0;
+	while(i < 9) {
+		chaineWithQuestTxt[j] = txt[i];
+		i ++;
+		j ++;
+	}
+	return chaineWithQuestTxt;
+
 }
 /*
  *FOnction qui retourne le nombre de personnage dans characters.txt
@@ -652,6 +1007,9 @@ char** getNamesCharacterFile() {
 	}
 }
 
+/*
+ * FOnction qui permet d'afficher la demande du nom du personnage
+ */
 void printGetName() {
 	printf("*****************************************************\n");
 	printf("*                                                   *\n");
@@ -731,7 +1089,9 @@ char* getName() {
 	}
 }
 
-
+/*
+ * FOnction qui affiche toutes les classes
+ */
 void printAllClass() {
 	printf("*****************************************************\n");
 	printf("*                                                   *\n");
@@ -757,6 +1117,44 @@ int getClass() {
 	return selectedNumber;
 }
 
+
+/*
+ * Fonction qui permet de créer le fichier de quêtes
+ */
+
+void creatQuest( char name[]) {
+	char * chaineWithQuestTxt = addQuestTxt(name);
+
+	FILE * fileQuest = fopen(chaineWithQuestTxt,"w");
+	if( fileQuest != NULL) {
+		FILE * fileQuests = fopen("quests.txt","r");
+		if( fileQuests != NULL) {
+			char tmp[999];
+	//		do {
+	//			if(tmp != EOF) {
+	//				fgets(tmp,-1,fileQuests);
+	//				fprintf(fileQuest,"%s",tmp);
+	//			}
+	//		}while(tmp != EOF);
+			while (fgets(tmp, 999, fileQuests))
+			{
+				fprintf(fileQuest, "%s", tmp);
+			}
+			fclose(fileQuests);
+		}
+		else {
+			printf("ERROR OPEN QUESTS.TXT\n");
+		}
+		fclose(fileQuest);
+	}
+	else {
+
+		printf("ERROR OPEN USERQUEST.TXT\n");
+	}
+
+	free(chaineWithQuestTxt);	
+
+}
 
 
 
@@ -830,8 +1228,12 @@ void creatUser() {
 			stamina = 7;
 		}
 		if(characterFile != NULL) {
-			fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s;%d;%d;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1,map,x,y);
+			fprintf(characterFile, "%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;%s;%s;%d;%d;%s;\n",name,className,agility,strenght,intellect,stamina,xp,lvl,hp,hp,bag1,map,x,y,"nodial");
 			fprintf(charactersFile,"%s;",name);
+			/*
+			 	Creer un tableau 2 dimm pour les quêtes
+			*/
+			creatQuest(name);
 			fclose(charactersFile);
 			fclose(characterFile);
 			play(name);
@@ -854,7 +1256,7 @@ char userAction() {
 	char action = NULL;
 	while (boolean == 0) {
 		scanf("%c",&action);
-		if(action == 'd' || action == 's' || action == 'q' || action == 'z' || action == 'e') {
+		if(action == 'd' || action == 's' || action == 'q' || action == 'z' || action == 'e' || action == 'o') {
 			boolean = 1;
 		}
 	}
@@ -862,19 +1264,198 @@ char userAction() {
 }
 
 /*
+ * Fonction qui permet de comparer 2 chaines de characteres
+ */
+int strcomp2(char * str1, char * str2) {
+	int equal = 1;
+	int i = 0;
+	while(str1[i] != '\0' && equal) {
+		if(str1[i] != str2[i]) {
+			equal = 0;
+		}
+		i ++;
+	}
+	return equal;
+}
+
+/* 
+ * Fonction qui permet de rajouter une quête dans le fichier {name}Quest.txt du personnage 
+ * Parammetre : le nom du personnage name[], le numéro de la quête, le text contenant la mission de la quête, 
+ *              le nbStart (surtout pour les quêtes demandant un nombre de chose) 0 souvant lorsque l'on commence la quête
+ *              et pour finir nbEnd pour dire à cb de chose la quête se termine
+ */ 
+void addQuest(char name[],int nb,char chaine[],char nbStart[], char nbEnd[]) {
+	char * nameWithQuestTxt = addQuestTxt(name);
+	FILE * questFile = fopen (nameWithQuestTxt, "a");
+	if(questFile != NULL) {
+		fprintf(questFile,"%d;%s;%s;%s\n",nb,chaine,nbStart,nbEnd);
+		fclose(questFile);
+
+	}else {
+		printf("ERROR QUEST FILE");
+	}
+
+}
+
+/*
+ * FOnction qui permet de retourner le message de la quête (mission) numéro @nb
+ */
+char * getQuestMission(char name[],int nb) {
+	char * nameWithQuestTxt = addQuestTxt(name);
+	FILE * questFile = fopen(nameWithQuestTxt, "r");
+	if(questFile != NULL) {
+		char tmp;
+		int goodLine = 0;
+		int count = 0;
+		int first = 1;
+		char strTmp[999];
+		int count2 = 0;
+		do {
+			char nbTmp[999]; // a changer si un jour on dépasse les 999 quêtes, lol :p
+			first = 1;
+			count = 0;
+			do {
+				tmp = fgetc(questFile);
+				if(tmp != EOF && tmp != ';' && first == 1) {
+					nbTmp[count] = tmp;
+				}
+				else {
+					int nbTmpInt = atoi(nbTmp);
+					count2 = 0;
+					if(nbTmpInt == nb) {
+						do {
+							tmp = fgetc(questFile);
+							if(tmp != ';' && tmp != EOF) {
+								strTmp[count2] = tmp;
+							}
+							count2 ++;
+						}while(tmp != ';' && tmp != EOF);
+						strTmp[count2] = '\0';
+						goodLine = 1;	
+						first = 0;
+					}else {
+						if(tmp != '\n') {
+							do {
+								tmp = fgetc(questFile);
+							}while(tmp != '\n');
+						}
+						first = 0;
+					}	
+				}
+				count ++;
+			}while(tmp != '\n' && first == 1 && tmp != EOF);
+		}while(goodLine == 0 && tmp != EOF);
+
+		printf("\nfin du while\n");
+		if(goodLine == 1) {
+			char * mission = malloc(count * sizeof(char));
+			if(mission != NULL) {
+				if(goodLine == 1) {
+					int i = 0;
+					while(strTmp[i] != '\0') {
+						mission[i] = strTmp[i];
+						i ++;
+					}
+					mission[i] = '\0';
+				}
+				else {
+					printf("notgood");
+					mission[0] = 'E';
+					mission[1] = 'R';
+					mission[2] = 'R';
+					mission[3] = 'O';
+					mission[4] = 'R';
+					
+				}	
+				fclose(questFile);
+				return mission;
+			}
+			else {
+				printf("error malloc\n");
+				return "error";
+			}			
+	
+		}
+		else {
+			printf("la\n");
+			char * missionNotFound = malloc(14*sizeof(char));
+			if(missionNotFound != NULL) {
+				missionNotFound[0] = 'M';
+				missionNotFound[1] = 'i';
+				missionNotFound[2] = 's';
+				missionNotFound[3] = 's';
+				missionNotFound[4] = 'i';
+				missionNotFound[5] = 'o';
+				missionNotFound[6] = 'n';
+				missionNotFound[7] = 'N';
+				missionNotFound[8] = 'o';
+				missionNotFound[9] = 't';
+				missionNotFound[10] = 'F';
+				missionNotFound[11] = 'o';
+				missionNotFound[12] = 'u';
+				missionNotFound[13] = 'n';
+				missionNotFound[14] = 'd';
+				return missionNotFound;
+			}
+			else {
+				return "missionNotFound";
+			}
+		}
+	}else {
+		printf("ERROR QUEST FILE\n");
+		return "error";
+	}
+}
+void printDialog(char dialogName[], char name[],Quest* quests) {
+		printf("On est dans la fonction printDial dial : %s\n",dialogName);
+		if(strcomp2(dialogName,"dialoguemaison1a")) {
+			printf("il detect que c'est le dialogue de la premier maison\n");
+			int nbCharName = 0;
+			while (name[nbCharName] != '\0') {
+				nbCharName ++;
+			}
+			//char * testQuestMission = getQuestMission(name,6);
+			//printf("QuestMission : %s  \n",testQuestMission);
+			printf("***********************************************************************************************\n");
+			printf("* Bonjour  %s,",name);
+			int j;
+			for(j=10; j> nbCharName ;j--) printf(" ");
+			printf("                                                                        *\n");
+			printf("*J'ai besoin de votre aide, une invasion de monstre est apparue dans les herdes,              *\n");
+			printf("*pouvez-vous les éliminer pour moi s'il vous plaît ?                                          *\n");
+			printf("***********************************************************************************************\n");
+			printf("*  1. Oui pas de soucis !                  2. Non, désolé                                     *\n");
+			printf("***********************************************************************************************\n");
+			int tmp;
+			do {
+				scanf("%d",&tmp);
+			}while(tmp <= 1 && tmp >= 2);
+			if(tmp == 1) {
+				//addQuest(name,1,"Tuez les monstres dans les hautes herbes dans startMap : ","0","10");
+				quests[0].status = 1;
+				printf("***********************************************************************************************\n"\
+				"*  Merci, beaucoup ! A bientot !                                                              *\n");
+				printf("***********************************************************************************************\n");
+			}			
+			else{
+				printf("***********************************************************************************************\n");
+				printf("*  C'est pas grâve, laissez nous mourir l'esprit serain                                       *\n");
+				printf("***********************************************************************************************\n");
+			}
+		}	
+}
+/*
  * Fonction qui permet de bouger le perssonage dans le tableau map
  */
-void deplacement(char action, char * nameTxt, char ** map) {
-//	FILE * charcterFile = fopen(nameTxt,"w+"); 		
-	char * xchar = getXCharacter(nameTxt);
-	char * ychar = getYCharacter(nameTxt);
-	int x = atoi(xchar);
-	int y = atoi(ychar);		
+int deplacement(char action,Character * user, char ** map) {
+	int x = user->x;
+	int y = user->y;		
 	map[y][x] = ' ';
 	map[y+1][x] = ' ';
 	map[y+1][x+1] = ' ';
 	map[y+1][x-1] = ' ';
 	map[y+2][x] = ' ';
+
 	if (action == 'z') {
 		y = y -1;	
 	}
@@ -886,66 +1467,214 @@ void deplacement(char action, char * nameTxt, char ** map) {
 	}
 	else if(action == 'd') {
 		x = x + 1;
-	}else {
-		return;	
+	}
+	else if(action == 'o') {
+		return 2;	
+	}
+	else if(action == 'e') {
+		if(( map[y-1][x] == '2' 
+			|| map[y-1][x-1] == '2' 
+			|| map[y][x-1] == '2'
+			|| map[y][x-2] == '2' 
+			|| map[y+1][x-2] == '2' 
+			|| map[y+2][x-2] == '2' 
+			|| map[y+2][x-1] == '2' 
+			|| map[y+3][x-1] == '2' 
+			|| map[y+3][x] == '2'
+			|| map[y+3][x+1] == '2' 
+			|| map[y+2][x+1] == '2' 
+			|| map[y+2][x+2] == '2' 
+			|| map[y+1][x+2] == '2' 
+			|| map[y][x+2] == '2' 
+			|| map[y][x+1] =='2' 
+			|| map[y-1][x+1] == '2' 
+			 ) && strcomp2(user->map,"maison1")) {
+			//setCharacter(nameTxt,"dialoguemaison1a",14);
+			char dial[30] = "dialoguemaison1a";
+			int i = 0;
+			//while(map[i] != '\0') {
+			while(map[i] != '\0') {
+				user->dial[i] = dial[i];
+				i++;
+			}
+			user->dial[i] = '\0';
+			return 1;
+		}
+			
+	}
+	else {
+		return 1;	
 	}
 	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
 		(map[y+1][x] == 'H' || map[y+1][x] == ' ') &&
 			(map[y+1][x+1] == 'H' || map[y+1][x+1] == ' ') &&
 				(map[y+1][x-1] == 'H' || map[y+1][x-1] == ' ') &&
 					(map[y+2][x] == 'H' || map[y+2][x] == ' ')){
-		char yIntToChar[10]; 
+		/*char yIntToChar[10]; 
 		sprintf(yIntToChar,"%d",y);
 		char xIntToChar[10]; 
 		sprintf(xIntToChar,"%d",x);
 		setCharacter(nameTxt,xIntToChar,12);
 		setCharacter(nameTxt,yIntToChar,13);
+		setCharacter(nameTxt,"nodial",14);
+		*/
+		user->x = x;
+		user->y = y;
+		char nodial[7] = "nodial";
+		int i = 0;
+		//while(nodial[i] != '\0') {
+		while(nodial[i] != '\0') {
+			user->dial[i] = nodial[i];
+			i++;
+		}
+		user->dial[i] = '\0';
+		return 1;
 	}
-	else if(map[y][x] == '1' ) {
-		setCharacter(nameTxt,"maison1",11);
-		setCharacter(nameTxt,"10",12);
-		setCharacter(nameTxt,"10",13);
+	else if((map[y][x] == '1' || map[y+1][x] == '1' ||map[y+1][x-1] == '1' || map[y+2][x] == '1') && strcomp2(user->map,"startMap")) {
+		/*setCharacter(nameTxt,"maison1",11);
+		setCharacter(nameTxt,"46",12);
+		setCharacter(nameTxt,"29",13);
+		setCharacter(nameTxt,"nodial",14);
+		*/
+		
+		char map[30] = "maison1";
+		int i = 0;
+		//while(map[i] != '\0') {
+		while(map[i] != '\0') {
+			user->map[i] = map[i];
+			i++;
+		}
+		user->map[i] = '\0';
+		user->x = 46;
+		user->y = 29;
+		return 1;
+	}
+	else if((map[y][x] == '1' || map[y+1][x] == '1' ||map[y+1][x-1] == '1' || map[y+2][x] == '1') && strcomp2(user->map,"maison1")) {
+		/*setCharacter(nameTxt,"startMap",11);
+		setCharacter(nameTxt,"32",12);
+		setCharacter(nameTxt,"12",13);
+		setCharacter(nameTxt,"nodial",14);
+		*/
+		char map[30] = "startMap";
+		int i = 0;
+		//while(map[i] != '\0') {
+		while(map[i] != '\0') {
+			user->map[i] = map[i];
+			i++;
+		}
+		user->map[i] = '\0';
+		user->x = 32;
+		user->y = 12;
+		return 1;
+	}
+	else {
+		return 1;
 	}
 }
 /*
  * Fonction principal, celle qui va faire tourner le jeu
  */
 void play(char name[]) {
-	char * nameTxt = addTxt(name);
-	char * mapName = getMapName(nameTxt);
-	char ** map = getMapFile(mapName);
-	if(map[0][0] == 'e' && map[0][1] == 'r' && map[0][2] == 'r' && map[0][3] == 'o' && map[0][4] == 'r' ) {
-        	free(map[0]);
-		free(map);
-		free(mapName);
-		free(nameTxt);
-		navigationMenu();
+	int dep;
+	Character* user = getUser(name);
+	char * userQuestTxt = addQuestTxt(name);
+	int i =0;
+	Quest quests[3];
+	while(i < 2) {
+		char * mission= getMissionQuest(userQuestTxt,i+1);
+		char * start= getStartQuest(userQuestTxt,i+1);
+		char * end= getEndQuest(userQuestTxt,i+1);
+		char * status= getStatusQuest(userQuestTxt,i+1);
+		int j=0;
+		while(mission[j] != '\0') {
+			quests[i].mission[j] =mission[j]; 
+			j++;
+		}
+		quests[i].mission[j] = '\0';
+		printf("%s\n", quests[0].mission);
+		quests[i].start = atoi(start);
+		quests[i].end = atoi(end);
+		quests[i].status= atoi(status);
+		i ++;
+	}
+	do {
+		char * nameTxt = addTxt(name);
+		char ** map = getMapFile(user->map);
+		if(map[0][0] == 'e' && map[0][1] == 'r' && map[0][2] == 'r' && map[0][3] == 'o' && map[0][4] == 'r' ) {
+			free(map[0]);
+			free(map);
+			//free(mapName);
+			free(nameTxt);
+			navigationMenu();
+		}
+		else {
+			system("clear");
+			printTop(user);
+	 
+			//char * xchar = user->x;
+			//char * ychar = user->y;
+			//int xint = atoi(xchar);
+			//int yint = atoi(ychar);		
+			map = mapWithMen(user->x ,user->y, map);
+			printMap(map,user,quests);
+			if(strcomp2(user->dial,"nodial") == 0) {
+				printDialog(user->dial,user->name, quests);
+			}
+			char action = userAction();
+			dep = deplacement(action,user,map);		
+			//on clear tous les mallocs
+			if(dep == 2) {
+				int action;
+				printMenuInGame();
+				action = getActionMenuInGame();
+				if(action == 0 ) {
+					dep = 1;
+				}
+				else if (action == 1) {
+					printf("Action 1\n");
+					save(user,quests);
+					dep = 1;
+				}
+			}
+			int i = 0;
+			while(i <35) {
+				free(map[i]);
+				i++;
+			}
+			free(map);
+			//free(mapName);
+			free(nameTxt);
+		}
+	}while(dep == 1);
+}
+
+void save(Character* user, Quest* quests) {
+	FILE * userFile = fopen(addTxt(user->name),"w");
+	FILE * questFile = fopen(addQuestTxt(user->name),"w");
+	if( userFile != NULL && questFile != NULL) {
+		fprintf(userFile,"%s;%s;%d;%d;%d;%d;%d;%d;%d;%d;;%s;%d;%d;%s;",user->name,user->className,user->agility,user->strenght,user->intellect,user->stamina,user->xp,user->lvl,user->hp,user->hpMax,user->map,user->x,user->y,user->dial);	
+		int i = 0;
+		while(i < 2) {
+			fprintf(questFile,"%d;%s;%d;%d;%d;\n",i,quests[i].mission,quests[i].start,quests[i].end,quests[i].status);
+			i++;
+		}
+		fclose(userFile);
+		fclose(questFile);
 	}
 	else {
-		system("clear");
-		printTop(nameTxt);
-		char * xchar = getXCharacter(nameTxt);
-		char * ychar = getYCharacter(nameTxt);
-		int xint = atoi(xchar);
-		int yint = atoi(ychar);		
-		map = mapWithMen(xint ,yint, map);
-		printMap(map);
-		char action = userAction();
-		deplacement(action,nameTxt,map);		
-		
-		//on clear tous les mallocs
-		int i = 0;
-		while(i <35) {
-        		free(map[i]);
-        		i++;
-        	}
-		free(xchar);
-		free(ychar);
-		free(map);
-		free(mapName);
-		free(nameTxt);
-		play(name);	
+		printf("ERROR OPEN FILE USERFILE OR QUESTFILE\n");
 	}
+}
+int getActionMenuInGame() {
+	int action;
+	do {
+		scanf("%d",&action);
+	}while(action > 2 || action < 0);
+	return action;	
+}
+void printMenuInGame() {
+	system("clear");
+	printf("****************************************************\n*                     Menu                          *\n*****************************************************\n*                   1.Sauvegarder                   *\n*                   2.Quitter                       *\n*                                                   *\n*                                                   *\n*                                                   *\n*                   0.Continuer                     *\n*****************************************************\n");
 }
 	
 /*
@@ -1055,12 +1784,47 @@ void navigationMenu() {
 
 }
 
-void printMap(char **mapTab) {
+void printMap(char **mapTab,Character * user,Quest* quests) {
 	int i = 0;
 	while( i < 35 ){
 		int j = 0 ;
 		while ( j < 96 ){
-			printf("%c",mapTab[i][j]);	
+			if(strcomp2(user->map,"maison1")) {
+				if(mapTab[i][j] == '1') {
+					printf("-");
+				}
+				else if(mapTab[i][j] == '2') {
+					printf(" ");
+				}
+				else if(i == 8 && j == 76) {
+					//faire les tests, si quête prise , si elle est en cours ou si elle est terminée 
+					//printf("!",mapTab[i][j]);
+					if(quests[0].status == 0) {
+						printf("!");
+					}
+					else if(quests[0].start == quests[0].end) {
+						printf("?");
+					}
+					else {
+						printf(" ");
+					}
+				}
+				else {
+					printf("%c",mapTab[i][j]);
+				}
+			}
+			else if(strcomp2(user->map,"startMap")) {
+				if(mapTab[i][j] == '1') {
+					printf("_");
+				}
+				else {
+					printf("%c",mapTab[i][j]);
+				}
+
+			}
+			else {
+				printf("%c",mapTab[i][j]);
+			}
 			j++;
 		}
 		i++;
@@ -1075,9 +1839,9 @@ void errorFile() {
 			j--;
 		}
 }
-char ** getMapFile(char nameMap[]) {
+char ** getMapFile(char mapName[]) {
 	FILE * map = NULL; 
-	char * nameMapTxt = addTxt(nameMap);
+	char * nameMapTxt = addTxt(mapName);
 	map = fopen(nameMapTxt,"r");
 	char ** mapTab = malloc(35*sizeof(char *));
 	int i = 0;
