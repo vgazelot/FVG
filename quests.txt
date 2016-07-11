@@ -1,0 +1,3 @@
+1;Tuez les montres dans les hautes herbes dans startMap;0;10;0
+2;Aller voir bob dans startMap;0;1;0
+
