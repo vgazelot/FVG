@@ -169,7 +169,6 @@ char * getMissionQuest(char questFile[], int id) {
 	FILE * quests = NULL;
 	quests =  fopen(questFile,"r");
 	int c = 1;
-	int count = 0;
 	char * mission = malloc(100*sizeof(char));
 	if(quests != NULL) {
 		int i = 0;
