@@ -28,6 +28,7 @@ void printScreenFight(char ** ScreenTab);
 void fight(Character * user);
 char actionUserFight();
 void traitementAction(char action,Character * user,Monster* monster);
+void flashMonster(char** screenFight,Monster* monster,Character* user);
 
 //Print
 void printGetName();
@@ -576,6 +577,7 @@ char ** addMonster(char ** screenFight,char monster[]){
 }
 void printScreenFight(char ** ScreenTab){
 
+	system("clear");
 	int i = 0;
 	while( i < 35 ){
 		int j = 0 ;
@@ -966,8 +968,153 @@ void printBottom(Character * user){
 		}
 }
 void bot(Monster * monster, Character * user ){
-	system("sleep 1");
 	user->hp = user->hp - monster->attack;	
+}
+void flashMonster(char** screenFight,Monster* monster,Character* user) {
+	if(strcomp2(monster->name,"spider" )){
+		screenFight[5][81] = ' ';
+		screenFight[6][82] = ' ';
+		screenFight[7][81] = ' ';
+		screenFight[8][74] = ' ';
+		screenFight[8][75] = ' ';
+		screenFight[8][78] = ' ';
+		screenFight[8][79] = ' ';
+		screenFight[8][80] = ' ';
+		screenFight[8][81] = ' ';
+		screenFight[8][82] = ' ';
+		screenFight[8][83] = ' ';
+		screenFight[8][84] = ' ';
+		screenFight[8][87] = ' ';
+		screenFight[8][88] = ' ';
+		screenFight[9][73] = ' ';
+		screenFight[9][74] = ' ';
+		screenFight[9][75] = ' ';
+		screenFight[9][76] = ' ';
+		screenFight[9][77] = ' ';
+		screenFight[9][81] = ' ';
+		screenFight[9][82] = ' ';
+		screenFight[9][83] = ' ';
+		screenFight[9][85] = ' ';
+		screenFight[9][86] = ' ';
+		screenFight[9][87] = ' ';
+		screenFight[9][88] = ' ';
+		screenFight[9][89] = ' ';
+		screenFight[10][73] = ' ';
+		screenFight[10][74] = ' ';
+		screenFight[10][75] = ' ';
+		screenFight[10][76] = ' ';
+		screenFight[10][78] = ' ';
+		screenFight[10][79] = ' ';
+		screenFight[10][80] = ' ';
+		screenFight[10][81] = ' ';
+		screenFight[10][82] = ' ';
+		screenFight[10][83] = ' ';
+		screenFight[10][84] = ' ';
+		screenFight[10][86] = ' ';
+		screenFight[10][87] = ' ';
+		screenFight[10][88] = ' ';
+		screenFight[10][89] = ' ';
+		screenFight[11][73] = ' ';
+		screenFight[11][74] = ' ';
+		screenFight[11][75] = ' ';
+		screenFight[11][76] = ' ';
+		screenFight[11][77] = ' ';
+		screenFight[11][78] = ' ';
+		screenFight[11][79] = ' ';
+		screenFight[11][80] = ' ';
+		screenFight[11][81] = ' ';
+		screenFight[11][82] = ' ';
+		screenFight[11][83] = ' ';
+		screenFight[11][84] = ' ';
+		screenFight[11][85] = ' ';
+		screenFight[11][86] = ' ';
+		screenFight[11][87] = ' ';
+		screenFight[11][88] = ' ';
+		screenFight[11][89] = ' ';
+		screenFight[12][72] = ' ';
+		screenFight[12][73] = ' ';
+		screenFight[12][76] = ' ';
+		screenFight[12][77] = ' ';
+		screenFight[12][81] = ' ';
+		screenFight[12][85] = ' ';
+		screenFight[12][86] = ' ';
+		screenFight[12][89] = ' ';
+		screenFight[12][90] = ' ';
+		screenFight[13][71] = ' ';
+		screenFight[13][72] = ' ';
+		screenFight[13][74] = ' ';
+		screenFight[13][75] = ' ';
+		screenFight[13][76] = ' ';
+		screenFight[13][77] = ' ';
+		screenFight[13][79] = ' ';
+		screenFight[13][81] = ' ';
+		screenFight[13][83] = ' ';
+		screenFight[13][85] = ' ';
+		screenFight[13][86] = ' ';
+		screenFight[13][87] = ' ';
+		screenFight[13][88] = ' ';
+		screenFight[13][90] = ' ';
+		screenFight[13][91] = ' ';
+		screenFight[14][73] = ' ';
+		screenFight[14][74] = ' ';
+		screenFight[14][75] = ' ';
+		screenFight[14][76] = ' ';
+		screenFight[14][77] = ' ';
+		screenFight[14][78] = ' ';
+		screenFight[14][79] = ' ';
+		screenFight[14][80] = ' ';
+		screenFight[14][81] = ' ';
+		screenFight[14][82] = ' ';
+		screenFight[14][83] = ' ';
+		screenFight[14][84] = ' ';
+		screenFight[14][85] = ' ';
+		screenFight[14][86] = ' ';
+		screenFight[14][87] = ' ';
+		screenFight[14][88] = ' ';
+		screenFight[14][89] = ' ';
+		screenFight[15][72] = ' ';
+		screenFight[15][73] = ' ';
+		screenFight[15][75] = ' ';
+		screenFight[15][76] = ' ';
+		screenFight[15][77] = ' ';
+		screenFight[15][78] = ' ';
+		screenFight[15][79] = ' ';
+		screenFight[15][80] = ' ';
+		screenFight[15][82] = ' ';
+		screenFight[15][83] = ' ';
+		screenFight[15][84] = ' ';
+		screenFight[15][85] = ' ';
+		screenFight[15][86] = ' ';
+		screenFight[15][87] = ' ';
+		screenFight[15][89] = ' ';
+		screenFight[15][90] = ' ';
+		screenFight[16][71] = ' ';
+		screenFight[16][72] = ' ';
+		screenFight[16][74] = ' ';
+		screenFight[16][75] = ' ';
+		screenFight[16][79] = ' ';
+		screenFight[16][80] = ' ';
+		screenFight[16][81] = ' ';
+		screenFight[16][82] = ' ';
+		screenFight[16][83] = ' ';
+		screenFight[16][87] = ' ';
+		screenFight[16][88] = ' ';
+		screenFight[16][90] = ' ';
+		screenFight[16][91] = ' ';
+		screenFight[17][74] = ' ';
+		screenFight[17][75] = ' ';
+		screenFight[17][87] = ' ';
+		screenFight[17][88] = ' ';
+		screenFight[18][74] = ' ';
+		screenFight[18][75] = ' ';
+		screenFight[18][87] = ' ';
+		screenFight[18][88] = ' ';
+		printScreenFight(screenFight);
+		printBottom(user);		
+		system("sleep 1");
+		addMonster(screenFight, monster->name);
+	
+		}
 }
 void printHp(char ** screenFight,Character * user,Monster * monster){
 	int ratioHpMonster = ( monster->hp *100) / monster->hpMax;
@@ -1041,7 +1188,6 @@ void printHp(char ** screenFight,Character * user,Monster * monster){
 		screenFight[4][39]=' ';
 		screenFight[4][40]=' ';
 		screenFight[4][41]=' ';
-		screenFight[4][42]=' ';
 		screenFight[4][43]=' ';
 		screenFight[4][44]=' ';
 	}else if (ratioHpMonster > 40 && ratioHpMonster <= 50){
@@ -1270,7 +1416,6 @@ void fight (Character * user){
 	}
 	else {
 		while(monster->hp > 0 && user->hp > 0 && action != 'f'){
-			system("clear");
   			addMonster(screenFight,monster->name);
 			printHp(screenFight,user,monster);
   			printScreenFight(screenFight);
@@ -1278,8 +1423,13 @@ void fight (Character * user){
    			action = actionUserFight();
 			if(action != 'f'){
   				traitementAction(action,user,monster);
+				flashMonster(screenFight,monster,user);
+				printHp(screenFight,user,monster);
+  				printScreenFight(screenFight);
+				printBottom(user);
+				system("sleep 1");	
+				bot(monster,user);
 			}
-			bot(monster,user);
 		}
 	}	
 }
