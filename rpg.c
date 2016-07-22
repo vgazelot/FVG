@@ -5,7 +5,7 @@
 //typedef
 typedef struct Character Character;
 typedef struct Quest Quest;
-
+typedef struct Monster Monster;
 //controler
 void navigationMenu();
 void play(char name[]);
@@ -18,7 +18,16 @@ int strcomp2(char * str1, char * str2);
 int deplacement(char action,Character * user, char ** map);
 int getMenu();
 int  selectCharacter();
+//Fight
 
+void printHp(char ** screenFight,Character * user,Monster * monster);
+void bot(Monster * monster, Character * user );
+void printBottom(Character * user);
+char ** addMonster(char ** screenFight,char name[]);
+void printScreenFight(char ** ScreenTab);
+void fight(Character * user);
+char actionUserFight();
+void traitementAction(char action,Character * user,Monster* monster);
 
 //Print
 void printGetName();
@@ -48,6 +57,7 @@ char * getStatusQuest(char questFile[],int id);
 
 
 //user structure 
+
 struct Character* getUser(char name[]);
 void creatUser();
 char** getNamesCharacterFile();
@@ -68,7 +78,9 @@ char * getXCharacter (char nameTxt[]);
 char * getYCharacter (char nameTxt[]);
 int getNbCharacter();
 
-
+//monster
+Monster *getSpider();
+Monster *getOther();
 //MenuInGame
 int getActionMenuInGame();
 
@@ -77,7 +89,15 @@ int getActionMenuInGame();
 void save(Character* user, Quest* quests);
 
 
+struct Monster {
+	int hp;
+	int hpMax;
+	int strenght;
+	int def;
+	int attack;
+	char name[10];
 
+};
 struct Character {
 	char name[10];
 	char className[10];
@@ -103,6 +123,42 @@ struct Quest {
 	int end;
 	int status;	
 };
+Monster *getSpider(){
+	Monster spider;
+	Monster * pspider = malloc(sizeof(spider));
+	pspider->hp = 250;
+	pspider->hpMax = 250;
+	pspider->strenght = 60;
+	pspider->def = 10; 
+	pspider->name[0] = 's';
+	pspider->name[1] = 'p';
+	pspider->name[2] = 'i';
+	pspider->name[3] = 'd';
+	pspider->name[4] = 'e';
+	pspider->name[5] = 'r';
+	pspider->name[6] = '\0';
+	pspider->attack = 30;
+	return pspider;
+
+}
+Monster *getOther(){
+	Monster other;
+	Monster * pother = malloc(sizeof(other));
+	pother->hp = 250;
+	pother->hpMax = 250;
+	pother->strenght = 60;
+	pother->def = 25; 
+	pother->name[0] = 'o';
+	pother->name[1] = 't';
+	pother->name[2] = 'h';
+	pother->name[3] = 'e';
+	pother->name[4] = 'r';
+	pother->name[6] = '\0';
+	pother->attack = 30 ;
+	return pother;
+}
+
+
 
 Character* getUser(char name[]) {
 	Character user;
@@ -169,7 +225,6 @@ char * getMissionQuest(char questFile[], int id) {
 	FILE * quests = NULL;
 	quests =  fopen(questFile,"r");
 	int c = 1;
-	int count = 0;
 	char * mission = malloc(100*sizeof(char));
 	if(quests != NULL) {
 		int i = 0;
@@ -330,33 +385,931 @@ char * getStatusQuest(char questFile[],int id) {
 	return status;
 }
 
-
-char ** mapWithMen(int x,int y,char ** map) {
-	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
-		(map[y+1][x] == 'H' || map[y+1][x] == ' ') &&
-			(map[y+1][x+1] == 'H' || map[y+1][x+1] == ' ') &&
-				(map[y+1][x-1] == 'H' || map[y+1][x-1] == ' ') &&
-					(map[y+2][x] == 'H' || map[y+2][x] == ' ')){
-		map[y][x] = 'o';
-		map[y+1][x] = 'I';
-		map[y+1][x+1] = '-';
-		map[y+1][x-1] = '-';
-		map[y+2][x] = '^';
-		return map;
+char ** getScreenFight(){
+	FILE * ScreenFightFile = NULL; 
+	ScreenFightFile = fopen("ScreenFight.txt","r");
+	char ** ScreenTab = malloc(35*sizeof(char *));
+	int i = 0;
+	while(i < 35){
+		ScreenTab[i] = malloc(96*sizeof(char));
+		i++;
 	}
-	else{
-		return map;
+	if(ScreenFightFile != NULL) {
+		char tmp;
+		int countC = 0;
+		int countL = 0;
+		do {
+			tmp = fgetc(ScreenFightFile);
+			if(tmp != EOF) {
+				if(countC < 96) {
+					ScreenTab[countL][countC] = tmp;
+					countC ++;	
+				}
+				else {
+					countL ++;
+					countC = 0;
+					ScreenTab[countL][countC] = tmp;
+				}
+			} 
+		}while(tmp != '\0' && tmp != EOF);
+		fclose(ScreenFightFile);
+		return ScreenTab;
+	}
+	else {
+		char** error = malloc (sizeof(char *));
+		error[0] = malloc(6*sizeof(char));
+		error[0][0] = 'e'; 
+		error[0][1] = 'r'; 
+		error[0][2] = 'r'; 
+		error[0][3] = 'o'; 
+		error[0][4] = 'r'; 
+		error[0][5] = '\0';
+		return error; 
+	}
+}
+char ** addMonster(char ** screenFight,char monster[]){
+	int x = 16;
+	int y = 43;
+	if(strcomp2(monster,"spider" )){
+		screenFight[5][81] = '(';
+		screenFight[6][82] = ')';
+		screenFight[7][81] = '(';
+		screenFight[8][74] = '/';
+		screenFight[8][75] = '\\';
+		screenFight[8][78] = '.';
+		screenFight[8][79] = '-';
+		screenFight[8][80] = '"';
+		screenFight[8][81] = '"';
+		screenFight[8][82] = '"';
+		screenFight[8][83] = '-';
+		screenFight[8][84] = '.';
+		screenFight[8][87] = '/';
+		screenFight[8][88] = '\\';
+		screenFight[9][73] = '/';
+		screenFight[9][74] = '/';
+		screenFight[9][75] = '\\';
+		screenFight[9][76] = '\\';
+		screenFight[9][77] = '/';
+		screenFight[9][81] = '.';
+		screenFight[9][82] = '.';
+		screenFight[9][83] = '.';
+		screenFight[9][85] = '\\';
+		screenFight[9][86] = '/';
+		screenFight[9][87] = '/';
+		screenFight[9][88] = '\\';
+		screenFight[9][89] = '\\';
+		screenFight[10][73] = '|';
+		screenFight[10][74] = '/';
+		screenFight[10][75] = '\\';
+		screenFight[10][76] = '|';
+		screenFight[10][78] = ',';
+		screenFight[10][79] = ';';
+		screenFight[10][80] = ';';
+		screenFight[10][81] = ';';
+		screenFight[10][82] = ';';
+		screenFight[10][83] = ';';
+		screenFight[10][84] = ',';
+		screenFight[10][86] = '|';
+		screenFight[10][87] = '/';
+		screenFight[10][88] = '\\';
+		screenFight[10][89] = '|';
+		screenFight[11][73] = '/';
+		screenFight[11][74] = '/';
+		screenFight[11][75] = '\\';
+		screenFight[11][76] = '\\';
+		screenFight[11][77] = '\\';
+		screenFight[11][78] = ';';
+		screenFight[11][79] = '-';
+		screenFight[11][80] = '"';
+		screenFight[11][81] = '"';
+		screenFight[11][82] = '"';
+		screenFight[11][83] = '-';
+		screenFight[11][84] = ';';
+		screenFight[11][85] = '/';
+		screenFight[11][86] = '/';
+		screenFight[11][87] = '/';
+		screenFight[11][88] = '\\';
+		screenFight[11][89] = '\\';
+		screenFight[12][72] = '/';
+		screenFight[12][73] = '/';
+		screenFight[12][76] = '\\';
+		screenFight[12][77] = '/';
+		screenFight[12][81] = '.';
+		screenFight[12][85] = '\\';
+		screenFight[12][86] = '/';
+		screenFight[12][89] = '\\';
+		screenFight[12][90] = '\\';
+		screenFight[13][71] = '(';
+		screenFight[13][72] = '|';
+		screenFight[13][74] = ',';
+		screenFight[13][75] = '-';
+		screenFight[13][76] = '_';
+		screenFight[13][77] = '|';
+		screenFight[13][79] = '\\';
+		screenFight[13][81] = '|';
+		screenFight[13][83] = '/';
+		screenFight[13][85] = '|';
+		screenFight[13][86] = '_';
+		screenFight[13][87] = '-';
+		screenFight[13][88] = ',';
+		screenFight[13][90] = '|';
+		screenFight[13][91] = ')';
+		screenFight[14][73] = '/';
+		screenFight[14][74] = '/';
+		screenFight[14][75] = '\\';
+		screenFight[14][76] = '_';
+		screenFight[14][77] = '_';
+		screenFight[14][78] = '\\';
+		screenFight[14][79] = '.';
+		screenFight[14][80] = '-';
+		screenFight[14][81] = '.';
+		screenFight[14][82] = '-';
+		screenFight[14][83] = '.';
+		screenFight[14][84] = '/';
+		screenFight[14][85] = '_';
+		screenFight[14][86] = '_';
+		screenFight[14][87] = '`';
+		screenFight[14][88] = '\\';
+		screenFight[14][89] = '\\';
+		screenFight[15][72] = '/';
+		screenFight[15][73] = '/';
+		screenFight[15][75] = '/';
+		screenFight[15][76] = '.';
+		screenFight[15][77] = '-';
+		screenFight[15][78] = '(';
+		screenFight[15][79] = '(';
+		screenFight[15][80] = ')';
+		screenFight[15][82] = '(';
+		screenFight[15][83] = ')';
+		screenFight[15][84] = ')';
+		screenFight[15][85] = '-';
+		screenFight[15][86] = '.';
+		screenFight[15][87] = '\\';
+		screenFight[15][89] = '\\';
+		screenFight[15][90] = '\\';
+		screenFight[16][71] = '(';
+		screenFight[16][72] = '\\';
+		screenFight[16][74] = '|';
+		screenFight[16][75] = ')';
+		screenFight[16][79] = '`';
+		screenFight[16][80] = '-';
+		screenFight[16][81] = '-';
+		screenFight[16][82] = '-';
+		screenFight[16][83] = '`';
+		screenFight[16][87] = '(';
+		screenFight[16][88] = '|';
+		screenFight[16][90] = '/';
+		screenFight[16][91] = ')';
+		screenFight[17][74] = '(';
+		screenFight[17][75] = '|';
+		screenFight[17][87] = '|';
+		screenFight[17][88] = ')';
+		screenFight[18][74] = '\\';
+		screenFight[18][75] = ')';
+		screenFight[18][87] = '(';
+		screenFight[18][88] = '/';		
+
+	}else{
+		screenFight[x][y]= 't';
+	}
+	return screenFight;
+}
+void printScreenFight(char ** ScreenTab){
+
+	int i = 0;
+	while( i < 35 ){
+		int j = 0 ;
+		while ( j < 96 ){
+				printf("%c",ScreenTab[i][j]);	
+			j++ ;
+		}
+		i++;
+	}
+
+}
+	
+char actionUserFight() {
+	int boolean = 0;
+	char action;
+	while (boolean == 0) {
+		scanf("%c",&action);
+		if(action == '1' || action == '2' || action == '3' || action == '4' || action == 'o'|| action == 'f') {
+			boolean = 1;
+		}
+	}
+	return action;	
+}
+void traitementAction(char action,Character * user,Monster* monster){
+	int spell = 0;
+	action = atoi(&action);
+	if(action == 1){
+		if ( strcomp2(user->className,"Warrior")) {
+			if(user->lvl > 0 && user->lvl <=10) {
+				spell = 30 + (user->strenght);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->strenght);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->strenght);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->strenght);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->strenght);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->strenght);
+			}
+		}else if(strcomp2(user->className,"Mage")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->intellect);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->intellect);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->intellect);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->intellect);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->intellect);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->intellect);
+			}
+
+		}else if(strcomp2(user->className,"Rogue")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->agility);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->agility);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->agility);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->agility);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->agility);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->agility);
+			}
+		}	
+	}
+	else if(action == 2){
+		if ( strcomp2(user->className,"Warrior")) {
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->strenght);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->strenght);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->strenght);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->strenght);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->strenght);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->strenght);
+			}
+		}else if(strcomp2(user->className,"Mage")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->intellect);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->intellect);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->intellect);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->intellect);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->intellect);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->intellect);
+			}
+
+		}else if(strcomp2(user->className,"Rogue")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->agility);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->agility);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->agility);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->agility);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->agility);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->agility);
+			}
+		}	
+	}
+	else if(action == 3){
+		if ( strcomp2(user->className,"Warrior")) {
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->strenght);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->strenght);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->strenght);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->strenght);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->strenght);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->strenght);
+			}
+		}else if(strcomp2(user->className,"Mage")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->intellect);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->intellect);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->intellect);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->intellect);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->intellect);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->intellect);
+			}
+
+		}else if(strcomp2(user->className,"Rogue")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->agility);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->agility);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->agility);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->agility);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->agility);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->agility);
+			}
+		}	
+	}
+	else if(action == 4){
+		if ( strcomp2(user->className,"Warrior")) {
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->strenght);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->strenght);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->strenght);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->strenght);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->strenght);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->strenght);
+			}
+		}else if(strcomp2(user->className,"Mage")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->intellect);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->intellect);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->intellect);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->intellect);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->intellect);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->intellect);
+			}
+
+		}else if(strcomp2(user->className,"Rogue")){
+			if(user->lvl >=0 && user->lvl <=10) {
+				spell = 30 + (user->agility);
+			}
+			else if(user->lvl >10 && user->lvl <= 20) {
+				spell = 40 +(user->agility);
+			}
+			else if(user->lvl >20 && user->lvl <= 30) {
+				spell = 50 + (user->agility);
+			}
+			else if(user->lvl >30 && user->lvl <= 40) {
+				spell = 60 + (user->agility);
+			}
+			else if(user->lvl >40 && user->lvl <= 50) {
+				spell = 70 + (user->agility);
+			}
+			else if(user->lvl >50 && user->lvl <= 60) {
+				spell = 80 + (user->agility);
+			}
+		}	
+	}
+	spell = spell - monster->def;
+	monster->hp = monster->hp - spell;
+}
+void printBottom(Character * user){
+	if ( strcomp2(user->className,"Warrior")){
+		if(user->lvl >0 && user->lvl <=10){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Frape heroic                                        |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >10 && user->lvl <=20){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Frape heroic            2.Fulgurance                |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >20 && user->lvl <=30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Frappe heroic            2.Fulgurance               |                                    *\n");
+			printf("** 3.Frappe du collosse                                  |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Frape heroic             2.Fulgurance               |                                    *\n");
+			printf("** 3.Frappe du colosse        4.Frappe Executrice        |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+	}
+	if ( strcomp2(user->className,"Rogue")){
+		if(user->lvl >0 && user->lvl <=10){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Embuche                                             |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >10 && user->lvl <=20){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Embuche            2.Coup bas                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >20 && user->lvl <=30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Embuche            2.Coup bas                       |                                    *\n");
+			printf("** 3.Suriner                                             |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Embuche                  2.Coup bas                 |                                    *\n");
+			printf("** 3.Suriner                  4.Saignement               |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+	}
+	if ( strcomp2(user->className,"Mage")){
+		if(user->lvl >0 && user->lvl <=10){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Boule de feu                                        |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >10 && user->lvl <=20){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Boule de feu            2.Trait de givre            |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >20 && user->lvl <=30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Boule de feu            2.Trait de givre            |                                    *\n");
+			printf("** 3.Pluie de glace                                      |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		if(user->lvl >30){
+			printf("***********************************************************************************************\n");
+			printf("**                                                       |    f.Fuite                         *\n");
+			printf("** 1.Boule de feu             2.Trait de givre           |                                    *\n");
+			printf("** 3.Pluie de glace           4.Explosion des arcades    |                                    *\n");
+			printf("**                                                       |                                    *\n");
+			printf("***********************************************************************************************\n");
+
+		}
+		}
+}
+void bot(Monster * monster, Character * user ){
+	system("sleep 1");
+	user->hp = user->hp - monster->attack;	
+}
+void printHp(char ** screenFight,Character * user,Monster * monster){
+	int ratioHpMonster = ( monster->hp *100) / monster->hpMax;
+	screenFight[3][34]='-';
+	screenFight[3][35]='-';
+	screenFight[3][36]='-';
+	screenFight[3][37]='-';
+	screenFight[3][38]='-';
+	screenFight[3][39]='-';
+	screenFight[3][40]='-';
+	screenFight[3][41]='-';
+	screenFight[3][42]='-';
+	screenFight[3][43]='-';
+	screenFight[3][44]='-';
+	screenFight[3][45]='-';
+	screenFight[4][34]='|';
+	screenFight[4][45]='|';
+	screenFight[5][34]='-';
+	screenFight[5][35]='-';
+	screenFight[5][36]='-';
+	screenFight[5][37]='-';
+	screenFight[5][38]='-';
+	screenFight[5][39]='-';
+	screenFight[5][40]='-';
+	screenFight[5][41]='-';
+	screenFight[5][42]='-';
+	screenFight[5][43]='-';
+	screenFight[5][44]='-';
+	screenFight[5][45]='-';
+	if (ratioHpMonster > 0 && ratioHpMonster <= 10){
+
+		screenFight[4][35]='#';
+		screenFight[4][36]=' ';
+		screenFight[4][37]=' ';
+		screenFight[4][38]=' ';
+		screenFight[4][39]=' ';
+		screenFight[4][40]=' ';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 10 && ratioHpMonster <= 20){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]=' ';
+		screenFight[4][38]=' ';
+		screenFight[4][39]=' ';
+		screenFight[4][40]=' ';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+
+	}else if (ratioHpMonster > 20 && ratioHpMonster <= 30){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]=' ';
+		screenFight[4][39]=' ';
+		screenFight[4][40]=' ';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	
+	}else if (ratioHpMonster > 30 && ratioHpMonster <= 40){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]=' ';
+		screenFight[4][40]=' ';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 40 && ratioHpMonster <= 50){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]=' ';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 50 && ratioHpMonster <= 60){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]='#';
+		screenFight[4][41]=' ';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 60 && ratioHpMonster <= 70){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]='#';
+		screenFight[4][41]='#';
+		screenFight[4][42]=' ';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 70 && ratioHpMonster <= 80){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]='#';
+		screenFight[4][41]='#';
+		screenFight[4][42]='#';
+		screenFight[4][43]=' ';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 80 && ratioHpMonster <= 90){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]='#';
+		screenFight[4][41]='#';
+		screenFight[4][42]='#';
+		screenFight[4][43]='#';
+		screenFight[4][44]=' ';
+	}else if (ratioHpMonster > 90 && ratioHpMonster <= 100){
+		screenFight[4][35]='#';
+		screenFight[4][36]='#';
+		screenFight[4][37]='#';
+		screenFight[4][38]='#';
+		screenFight[4][39]='#';
+		screenFight[4][40]='#';
+		screenFight[4][41]='#';
+		screenFight[4][42]='#';
+		screenFight[4][43]='#';
+		screenFight[4][44]='#';
+		}
+	int ratioHpUser = ( user->hp *100) / user->hpMax;
+	screenFight[29][67]='-';
+	screenFight[29][68]='-';
+	screenFight[29][69]='-';
+	screenFight[29][70]='-';
+	screenFight[29][71]='-';
+	screenFight[29][72]='-';
+	screenFight[29][73]='-';
+	screenFight[29][74]='-';
+	screenFight[29][75]='-';
+	screenFight[29][76]='-';
+	screenFight[29][77]='-';
+	screenFight[30][64]='P';
+	screenFight[30][65]='V';
+	screenFight[30][66]=':';
+	screenFight[30][67]='|';
+	screenFight[30][77]='|';
+	screenFight[31][67]='-';
+	screenFight[31][68]='-';
+	screenFight[31][69]='-';
+	screenFight[31][70]='-';
+	screenFight[31][71]='-';
+	screenFight[31][72]='-';
+	screenFight[31][73]='-';
+	screenFight[31][74]='-';
+	screenFight[31][75]='-';
+	screenFight[31][76]='-';
+	screenFight[31][77]='-';
+	if (ratioHpUser > 0 && ratioHpUser <= 10){
+		screenFight[30][68]=' ';
+		screenFight[30][69]=' ';
+		screenFight[30][70]=' ';
+		screenFight[30][71]=' ';
+		screenFight[30][72]=' ';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 10 && ratioHpUser <= 20){
+		screenFight[30][68]='#';
+		screenFight[30][69]=' ';
+		screenFight[30][70]=' ';
+		screenFight[30][71]=' ';
+		screenFight[30][72]=' ';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+
+	}else if (ratioHpUser > 20 && ratioHpUser <= 30){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]=' ';
+		screenFight[30][71]=' ';
+		screenFight[30][72]=' ';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	
+	}else if (ratioHpUser > 30 && ratioHpUser <= 40){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]=' ';
+		screenFight[30][72]=' ';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 40 && ratioHpUser <= 50){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]=' ';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 50 && ratioHpUser <= 60){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]='#';
+		screenFight[30][73]=' ';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 60 && ratioHpUser <= 70){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]='#';
+		screenFight[30][73]='#';
+		screenFight[30][74]=' ';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 70 && ratioHpUser <= 80){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]='#';
+		screenFight[30][73]='#';
+		screenFight[30][74]='#';
+		screenFight[30][75]=' ';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 80 && ratioHpUser <= 90){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]='#';
+		screenFight[30][73]='#';
+		screenFight[30][74]='#';
+		screenFight[30][75]='#';
+		screenFight[30][76]=' ';
+	}else if (ratioHpUser > 90 && ratioHpUser <= 100){
+		screenFight[30][68]='#';
+		screenFight[30][69]='#';
+		screenFight[30][70]='#';
+		screenFight[30][71]='#';
+		screenFight[30][72]='#';
+		screenFight[30][73]='#';
+		screenFight[30][74]='#';
+		screenFight[30][75]='#';
+		screenFight[30][76]='#';
+		}
+/*	printf("*       ----------                                                                            *\n");
+	printf("* HP : |"); 
+	int nbLife;
+	for (nbLife=0; nbLife<ratioHP/10; nbLife++)
+		printf("#");
+	for (nbLife=0; nbLife<10 - (ratioHP/10); nbLife++)
+                printf(" ");
+	printf("|                                                                           *\n");
+	printf("*       ----------                                                                            *\n");
+
+*/
+}
+void fight (Character * user){
+	char action = ' ';  
+	int alea = rand()%1;
+	Monster * monster;
+  	if(alea == 0){
+		monster = getSpider();
+  	}else{
+		monster = getOther();
+  	}
+  	char ** screenFight = getScreenFight();
+	if(screenFight[0][0] =='e' && screenFight[0][1] == 'r' && screenFight[0][2] == 'r' && screenFight[0][3] == 'o' && screenFight[0][4] == 'r') {
+		printf("ERROR\n");
+		return;
+	}
+	else {
+		while(monster->hp > 0 && user->hp > 0 && action != 'f'){
+			system("clear");
+  			addMonster(screenFight,monster->name);
+			printHp(screenFight,user,monster);
+  			printScreenFight(screenFight);
+			printBottom(user);
+   			action = actionUserFight();
+			if(action != 'f'){
+  				traitementAction(action,user,monster);
+			}
+			bot(monster,user);
+		}
 	}	
 }
-
-
-
-
-char * getNameCharacter(char nameTxt[]) {
-	FILE * character = NULL;
-	character =  fopen(nameTxt,"r");
-	char * name = malloc(10 * sizeof(char));
-	if(character != NULL) {
+  
+char ** mapWithMen(int x,int y,char ** map) {
+  	if ((map[y][x] == 'H' || map[y][x] == ' ') &&
+  		(map[y+1][x] == 'H' || map[y+1][x] == ' ') &&
+  			(map[y+1][x+1] == 'H' || map[y+1][x+1] == ' ') &&
+  				(map[y+1][x-1] == 'H' || map[y+1][x-1] == ' ') &&
+  					(map[y+2][x] == 'H' || map[y+2][x] == ' ')){
+  		map[y][x] = 'o';
+  		map[y+1][x] = 'I';
+  		map[y+1][x+1] = '-';
+  		map[y+1][x-1] = '-';
+  		map[y+2][x] = '^';
+  		return map;
+  	}
+  	else{
+  		return map;
+  	}	
+  }
+  
+  
+  
+  
+  char * getNameCharacter(char nameTxt[]) {
+  	FILE * character = NULL;
+  	character =  fopen(nameTxt,"r");
+  	char * name = malloc(10 * sizeof(char));
+ 	if(character != NULL) {
 
 		int i = 0;
 		char tmp;
@@ -1193,7 +2146,6 @@ void creatQuest( char name[]) {
 }
 
 
-
 /*
  *Fonction main de la création d'un personnage
  */
@@ -1274,7 +2226,7 @@ void creatUser() {
 			fclose(characterFile);
 			play(name);
 		}
-		else {
+	else {
 			fclose(charactersFile);
 			fclose(characterFile);
 			printf("Impossible d'ouvrir le fichier characters.txt");
@@ -1289,7 +2241,7 @@ void creatUser() {
  */
 char userAction() {
 	int boolean = 0;
-	char action = NULL;
+	char action;
 	while (boolean == 0) {
 		scanf("%c",&action);
 		if(action == 'd' || action == 's' || action == 'q' || action == 'z' || action == 'e' || action == 'o') {
@@ -1427,7 +2379,6 @@ int deplacement(char action,Character * user, char ** map) {
 			user->dial[i] = '\0';
 			return 1;
 		}
-			
 	}
 	else {
 		return 1;	
@@ -1449,12 +2400,20 @@ int deplacement(char action,Character * user, char ** map) {
 		user->y = y;
 		char nodial[7] = "nodial";
 		int i = 0;
-		//while(nodial[i] != '\0') {
 		while(nodial[i] != '\0') {
 			user->dial[i] = nodial[i];
 			i++;
 		}
 		user->dial[i] = '\0';
+		if(map[y][x] == 'H' || map[y+1][x] == 'H' ||map[y+1][x-1] == 'H' || map[y+2][x] == 'H') {
+			int alea = rand()%11;
+		//	printf("%d\n",alea);
+			if ( alea >=0 && alea <=3 ){
+		//	printf("tu est dans le alea de deplacement\n");	
+			fight(user);
+				
+			}
+		}
 		return 1;
 	}
 	else if((map[y][x] == '1' || map[y+1][x] == '1' ||map[y+1][x-1] == '1' || map[y+2][x] == '1') && strcomp2(user->map,"startMap")) {
@@ -1466,7 +2425,6 @@ int deplacement(char action,Character * user, char ** map) {
 		
 		char map[30] = "maison1";
 		int i = 0;
-		//while(map[i] != '\0') {
 		while(map[i] != '\0') {
 			user->map[i] = map[i];
 			i++;
@@ -1484,7 +2442,6 @@ int deplacement(char action,Character * user, char ** map) {
 		*/
 		char map[30] = "startMap";
 		int i = 0;
-		//while(map[i] != '\0') {
 		while(map[i] != '\0') {
 			user->map[i] = map[i];
 			i++;
